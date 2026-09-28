@@ -31,6 +31,11 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-blue.svg" alt="License"></a>
 </p>
 
+<p align="center"><sub>
+  Independent fork of <a href="https://github.com/calesthio/OpenMontage">OpenMontage</a> by Calesthio,
+  licensed AGPL-3.0. See <a href="NOTICE.md">NOTICE.md</a> for origin, license terms, and local changes.
+</sub></p>
+
 <p align="center">
   <a href="https://github.com/trending">
     <picture>
@@ -45,12 +50,13 @@
 <p align="center">
   <a href="https://www.youtube.com/@OpenMontage"><img src="https://img.shields.io/badge/YouTube-%40OpenMontage-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube"></a>
   <a href="https://x.com/calesthioailabs"><img src="https://img.shields.io/badge/X-%40calesthioailabs-111111?style=for-the-badge&logo=x&logoColor=white" alt="X"></a>
-  <a href="https://github.com/calesthio/OpenMontage/discussions"><img src="https://img.shields.io/badge/Community-GitHub%20Discussions-0b1220?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions"></a>
+  <a href="https://github.com/hungnt9801/OpenMontageVideo/discussions"><img src="https://img.shields.io/badge/Community-GitHub%20Discussions-0b1220?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions"></a>
 </p>
 
 ## Sponsors
 
-> Want to support OpenMontage? [Sponsor the project](https://github.com/sponsors/calesthio).
+> This fork is maintained at [hungnt9801/OpenMontageVideo](https://github.com/hungnt9801/OpenMontageVideo).
+> To support the original project, see [github.com/sponsors/calesthio](https://github.com/sponsors/calesthio).
 
 <details open>
 <summary>Click to collapse</summary>
@@ -195,8 +201,8 @@ And when a run is done, hit **▶ REPLAY RUN** — the whole production replays 
 ### Install & Run
 
 ```bash
-git clone https://github.com/calesthio/OpenMontage.git
-cd OpenMontage
+git clone https://github.com/hungnt9801/OpenMontageVideo.git
+cd OpenMontageVideo
 make setup
 ```
 
@@ -731,11 +737,11 @@ See `docs/ARCHITECTURE.md` for the full technical reference, `docs/PROVIDERS.md`
 
 ### Join the Community
 
-We use [GitHub Discussions](https://github.com/calesthio/OpenMontage/discussions) to share work and ideas:
+We use [GitHub Discussions](https://github.com/hungnt9801/OpenMontageVideo/discussions) to share work and ideas:
 
-- **[Show and Tell](https://github.com/calesthio/OpenMontage/discussions/categories/show-and-tell)** — Share videos you've made, prompts that worked well, or creative workflows you've discovered
-- **[Ideas](https://github.com/calesthio/OpenMontage/discussions/categories/ideas)** — Suggest new pipelines, tools, style playbooks, or integrations
-- **[Q&A](https://github.com/calesthio/OpenMontage/discussions/categories/q-a)** — Ask questions about setup, pipelines, or troubleshooting
+- **[Show and Tell](https://github.com/hungnt9801/OpenMontageVideo/discussions/categories/show-and-tell)** — Share videos you've made, prompts that worked well, or creative workflows you've discovered
+- **[Ideas](https://github.com/hungnt9801/OpenMontageVideo/discussions/categories/ideas)** — Suggest new pipelines, tools, style playbooks, or integrations
+- **[Q&A](https://github.com/hungnt9801/OpenMontageVideo/discussions/categories/q-a)** — Ask questions about setup, pipelines, or troubleshooting
 
 Made something cool? Post it in Show and Tell — we'd love to see what you build.
 
@@ -743,9 +749,11 @@ Made something cool? Post it in Show and Tell — we'd love to see what you buil
 
 ## Contact
 
-For updates, releases, and behind-the-scenes build notes, follow [@calesthioailabs](https://x.com/calesthioailabs).
+This fork is maintained at [hungnt9801/OpenMontageVideo](https://github.com/hungnt9801/OpenMontageVideo).
 
-For bugs, feature requests, and workflow discussions, use [GitHub Issues](https://github.com/calesthio/OpenMontage/issues) and [GitHub Discussions](https://github.com/calesthio/OpenMontage/discussions) so everything stays visible and actionable.
+For bugs, feature requests, and workflow discussions, use [GitHub Issues](https://github.com/hungnt9801/OpenMontageVideo/issues) and [GitHub Discussions](https://github.com/hungnt9801/OpenMontageVideo/discussions) so everything stays visible and actionable.
+
+The original project lives at [calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) — follow [@calesthioailabs](https://x.com/calesthioailabs) for upstream updates.
 
 ---
 
@@ -763,11 +771,11 @@ make test
 
 ## Star History
 
-<a href="https://star-history.dera.page/#calesthio/OpenMontage&type=date&legend=top-left">
+<a href="https://star-history.dera.page/#hungnt9801/OpenMontageVideo&type=date&legend=top-left">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=calesthio/OpenMontage&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=calesthio/OpenMontage&type=date&legend=top-left" />
-    <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=calesthio/OpenMontage&type=date&legend=top-left" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=hungnt9801/OpenMontageVideo&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=hungnt9801/OpenMontageVideo&type=date&legend=top-left" />
+    <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=hungnt9801/OpenMontageVideo&type=date&legend=top-left" />
   </picture>
 </a>
 
@@ -783,4 +791,4 @@ make test
 
 If this project looks useful to you, a ⭐ would really mean a lot — it helps others discover it too.
 
-If you'd like to go further, [sponsor the project](https://github.com/sponsors/calesthio) — OpenMontage is built nights and weekends, and your support makes that sustainable.
+If you'd like to go further, [sponsor the original project](https://github.com/sponsors/calesthio) — OpenMontage is built nights and weekends, and your support makes that sustainable.
