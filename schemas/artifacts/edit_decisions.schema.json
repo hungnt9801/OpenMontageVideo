@@ -61,7 +61,49 @@
             "type": "string",
             "description": "Backing color used behind this cut by composition runtimes"
           },
-          "reason": { "type": "string" }
+          "reason": { "type": "string" },
+
+          "type": {
+            "type": "string",
+            "description": "Remotion component scene type (e.g. text_card, stat_card, bar_chart, pie_chart, line_chart, callout, comparison, progress_bar, kpi_grid, hero_title). Presence of a component type routes the cut to the Remotion renderer. NOTE: video_compose passes edit_decisions VERBATIM as the Remotion props, so component props must live on the cut itself."
+          },
+          "text": { "type": "string" },
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "stat": { "type": "string" },
+          "label": { "type": "string" },
+          "color": { "type": "string" },
+          "accentColor": { "type": "string" },
+          "borderColor": { "type": "string" },
+          "icon": { "type": "string" },
+          "callout_type": {
+            "type": "string",
+            "enum": ["info", "warning", "tip", "quote"],
+            "description": "CalloutBox TYPE_DEFAULTS key. RemotionComposer:src/components/CalloutBox.tsx:9. An unlisted value crashes the render with a misleading TypeError."
+          },
+          "chartData": {
+            "type": "array",
+            "items": { "type": "object" },
+            "description": "Chart / KPI data points, e.g. [{label, value}] or [{label, value, change, suffix}]."
+          },
+          "chartColors": { "type": "array", "items": { "type": "string" } },
+          "chartAnimation": { "type": "string" },
+          "showGrid": { "type": "boolean" },
+          "showValues": { "type": "boolean" },
+          "showLegend": { "type": "boolean" },
+          "donut": { "type": "boolean" },
+          "centerLabel": { "type": "string" },
+          "centerValue": { "type": "string" },
+          "leftLabel": { "type": "string" },
+          "leftValue": { "type": "string" },
+          "rightLabel": { "type": "string" },
+          "rightValue": { "type": "string" },
+          "progress": { "type": "number", "minimum": 0, "maximum": 1 },
+          "progressLabel": { "type": "string" },
+          "progressColor": { "type": "string" },
+          "columns": { "type": "integer", "minimum": 1 },
+          "scale": { "type": "number" },
+          "animation": { "type": "string" }
         },
         "additionalProperties": false
       }
@@ -87,6 +129,22 @@
           },
           "animation": { "type": "string" },
           "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "captions": {
+      "type": "array",
+      "description": "Word- or phrase-level caption cues consumed by the Remotion CaptionOverlay component. video_compose passes edit_decisions VERBATIM as the Remotion props, so this key must live here to be usable - the same contract issue as the component scene props on cuts[].",
+      "items": {
+        "type": "object",
+        "required": ["word", "startMs", "endMs"],
+        "properties": {
+          "word": { "type": "string" },
+          "startMs": { "type": "number", "minimum": 0 },
+          "endMs": { "type": "number", "minimum": 0 },
+          "timestampMs": { "type": "number" },
+          "confidence": { "type": "number" }
         },
         "additionalProperties": false
       }

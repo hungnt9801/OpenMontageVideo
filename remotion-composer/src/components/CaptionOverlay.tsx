@@ -118,6 +118,15 @@ const PageRenderer: React.FC<{
                   // previous behavior; for CJK it prevents mid-word breaks.
                   display: "inline-block",
                   whiteSpace: "nowrap",
+                  // A literal separator character CANNOT be used here: with
+                  // `white-space: nowrap` on an inline-block, trailing
+                  // whitespace collapses at the end of the box, so the
+                  // separator renders in the DOM but is invisible on screen
+                  // and words appear jammed together ("all.Three"). Use a
+                  // margin instead, which whitespace collapsing cannot remove.
+                  // An empty separator (CJK) still gets no gap.
+                  marginRight:
+                    i < page.words.length - 1 && wordSeparator ? "0.28em" : 0,
                   color: isActive ? highlightColor : isPast ? color : `${color}99`,
                   transition: "none", // CSS transitions forbidden in Remotion
                   textShadow: isActive
@@ -125,7 +134,7 @@ const PageRenderer: React.FC<{
                     : "0 2px 4px rgba(0,0,0,0.5)",
                 }}
               >
-                {w.word}{i < page.words.length - 1 ? wordSeparator : ""}
+                {w.word}
               </span>
             );
           })}
