@@ -1,0 +1,13 @@
+# OpenMontage - dependency mà repo còn thiếu (file cục bộ, không sửa file của upstream)
+#
+# faster-whisper: đường STT mặc định của tools/analysis/transcriber.py.
+#   Repo khai báo python:faster_whisper trong dependencies của tool nhưng
+#   KHÔNG có trong requirements*.txt hay Makefile -> make setup không cài.
+faster-whisper>=1.0
+
+# playwright: cần cho scripts/backlot_screenshot_stage.py,
+#   scripts/backlot_visual_eval.py, scripts/backlot_watch_captures.py,
+#   tests/backlot/test_ui_bug_bash.py (test tự skip nếu thiếu PACKAGE),
+#   và tool production tools/character/character_animation.py.
+#   LUÔN cài kèm browser:  python -m playwright install chromium
+playwright>=1.40
