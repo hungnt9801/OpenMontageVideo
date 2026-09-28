@@ -44,7 +44,16 @@ Carried in with the initial import; see the import commit for the full diff.
 
 ## Upstream references
 
-Some badges and promotional links in `README.md` still point at the original
-project — its website (`openmontage.video`), YouTube channel (`@OpenMontage`),
-X account, and the upstream sponsors table. They are kept as attribution to the
-upstream project, not as claims of this fork.
+Links and badges that belong to the upstream project are labelled as upstream,
+or removed, so that nothing in this repository reads as this fork's own site,
+channel, sponsorship, or award:
+
+- the upstream website, YouTube channel, and X account carry an "Upstream" badge
+  label in `README.md`
+- the upstream sponsors table sits under a `Sponsors (upstream)` heading
+- the GitHub Trending "#1 Repository of the Day" badge was removed from
+  `README.md` — that award belongs to the upstream repository
+
+Attribution to the original authors is kept deliberately. The project name, the
+mascot, and the bulk of the documentation still say "OpenMontage", because this
+fork has not been renamed.

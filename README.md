@@ -12,7 +12,7 @@
 <p align="center"><strong>The first open-source, agentic video production system.</strong></p>
 
 <p align="center">
-  <a href="https://openmontage.video"><img src="https://img.shields.io/badge/Website-openmontage.video-d14a28?style=for-the-badge" alt="openmontage.video"></a>
+  <a href="https://openmontage.video"><img src="https://img.shields.io/badge/Upstream%20Site-openmontage.video-d14a28?style=for-the-badge" alt="Upstream site: openmontage.video"></a>
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
   <a href="#try-these-prompts">Try These Prompts</a> &nbsp;·&nbsp;
   <a href="#pipelines">Pipelines</a> &nbsp;·&nbsp;
   <a href="#how-it-works">How It Works</a> &nbsp;·&nbsp;
-  <a href="#sponsors">Sponsors</a> &nbsp;·&nbsp;
+  <a href="#sponsors-upstream">Sponsors</a> &nbsp;·&nbsp;
   <a href="docs/PROVIDERS.md">Providers</a> &nbsp;·&nbsp;
   <a href="docs/PR_REVIEW_GUIDE.md">Review Guide</a> &nbsp;·&nbsp;
   <a href="AGENT_GUIDE.md">Agent Guide</a>
@@ -36,27 +36,18 @@
   licensed AGPL-3.0. See <a href="NOTICE.md">NOTICE.md</a> for origin, license terms, and local changes.
 </sub></p>
 
-<p align="center">
-  <a href="https://github.com/trending">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/repo-of-the-day-dark.svg">
-      <img alt="🏆 #1 Repository of the Day on GitHub Trending" src=".github/assets/repo-of-the-day-light.svg" height="60">
-    </picture>
-  </a>
-</p>
-
-<p align="center"><strong>Follow The Build</strong></p>
+<p align="center"><strong>Follow The Build</strong> — upstream project</p>
 
 <p align="center">
-  <a href="https://www.youtube.com/@OpenMontage"><img src="https://img.shields.io/badge/YouTube-%40OpenMontage-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube"></a>
-  <a href="https://x.com/calesthioailabs"><img src="https://img.shields.io/badge/X-%40calesthioailabs-111111?style=for-the-badge&logo=x&logoColor=white" alt="X"></a>
+  <a href="https://www.youtube.com/@OpenMontage"><img src="https://img.shields.io/badge/Upstream%20YouTube-%40OpenMontage-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Upstream YouTube"></a>
+  <a href="https://x.com/calesthioailabs"><img src="https://img.shields.io/badge/Upstream%20X-%40calesthioailabs-111111?style=for-the-badge&logo=x&logoColor=white" alt="Upstream X"></a>
   <a href="https://github.com/hungnt9801/OpenMontageVideo/discussions"><img src="https://img.shields.io/badge/Community-GitHub%20Discussions-0b1220?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions"></a>
 </p>
 
-## Sponsors
+## Sponsors (upstream)
 
 > This fork is maintained at [hungnt9801/OpenMontageVideo](https://github.com/hungnt9801/OpenMontageVideo).
-> To support the original project, see [github.com/sponsors/calesthio](https://github.com/sponsors/calesthio).
+> The sponsors below support the original project — to support it too, see [github.com/sponsors/calesthio](https://github.com/sponsors/calesthio).
 
 <details open>
 <summary>Click to collapse</summary>
@@ -129,7 +120,7 @@ Turn your AI coding assistant into a full video production studio. Describe what
 > **"One Prompt Built This Complete 3D World"** — a continuous 60-second journey through one coherent, editable fantasy world. Distinct terrain regions, an inhabited village, waterways, ruins, dense vegetation, and a late hero-landmark reveal are assembled from textured 3D assets, then brought together with cinematic lighting, atmospheric music, and a planned camera path.
 
 <p align="center">
-  <a href="https://www.youtube.com/@OpenMontage?sub_confirmation=1"><strong>Subscribe to @OpenMontage on YouTube</strong></a> to see new videos as they ship — every video includes the full prompt, pipeline, tools used, and cost so you can reproduce it yourself.
+  <a href="https://www.youtube.com/@OpenMontage?sub_confirmation=1"><strong>Subscribe to @OpenMontage on YouTube</strong></a> (the upstream project) to see new videos as they ship — every video includes the full prompt, pipeline, tools used, and cost so you can reproduce it yourself.
 </p>
 
 ---
