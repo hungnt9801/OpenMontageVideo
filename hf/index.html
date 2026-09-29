@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="vi" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Nhà Sư Và Chiếc Bát Rỗng</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1080px; height: 1920px;
+        overflow: hidden; background: #14100b;
+      }
+      #root {
+        position: relative;
+        width: 1080px; height: 1920px;
+        overflow: hidden;
+        background: #14100b;
+        font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      }
+      .layer { position: absolute; inset: 0; }
+      .plate, .depth { overflow: hidden; }
+      .plate img, .depth img {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        will-change: transform;
+      }
+      .kb {
+        transform: translate(var(--px, 0), var(--py, 0))
+                   scale(var(--sx, 1), var(--sy, 1));
+        transform-origin: 50% 45%;
+        filter: brightness(calc(0.94 + var(--flicker, 0) * 0.10))
+                saturate(1.04);
+      }
+      .kb-blur {
+        transform: scale(1.2);
+        transform-origin: 50% 45%;
+        filter: blur(26px) brightness(0.82) saturate(1.1);
+      }
+      .depth { mix-blend-mode: soft-light; }
+      .vignette {
+        background:
+          radial-gradient(115% 78% at 50% 42%,
+            rgba(0,0,0,0) 44%, rgba(20,12,4,0.34) 76%, rgba(12,7,2,0.72) 100%);
+        mix-blend-mode: multiply;
+      }
+      .grain {
+        opacity: 0.16;
+        mix-blend-mode: overlay;
+        background-image:
+          repeating-conic-gradient(rgba(255,255,255,0.055) 0% 25%, rgba(0,0,0,0.055) 0% 50%);
+        background-size: 3px 3px;
+        filter: blur(0.4px);
+      }
+      .particle { pointer-events: none; }
+      .particle canvas { width: 100%; height: 100%; display: block; }
+      .overlay {
+        display: grid; place-items: center;
+        pointer-events: none;
+      }
+      /* Captions sit inside the 900x1400 safe zone, above platform UI. */
+      .caption-layer {
+        align-items: end;
+        justify-items: center;
+        padding-bottom: 470px;
+        visibility: hidden;
+      }
+      .caption {
+        max-width: 900px;
+        padding: 16px 26px;
+        border-radius: 10px;
+        background: rgba(8, 5, 2, 0.42);
+        text-align: center;
+      }
+      .cline {
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1.26;
+        letter-spacing: 0.005em;
+        white-space: nowrap;
+        -webkit-text-stroke: 3px #140d04;
+        paint-order: stroke fill;
+        text-shadow: 0 3px 14px rgba(0,0,0,0.85);
+      }
+      .cline + .cline { margin-top: 6px; }
+      .cw { color: #ffffff; }
+      .title-wrap {
+        position: absolute; top: 150px; left: 0; right: 0;
+        display: grid; justify-items: center; gap: 6px;
+      }
+      .title-line {
+        font-size: 78px; font-weight: 800; letter-spacing: 0.02em;
+        line-height: 1.04; text-align: center; text-transform: uppercase;
+        -webkit-text-stroke: 3px #140d04;
+        paint-order: stroke fill;
+        text-shadow: 0 6px 22px rgba(0,0,0,0.55);
+      }
+      .t1 { color: #f5c518; }
+      .t2 { color: #e08a2b; }
+      .subtitle {
+        margin-top: 10px;
+        font-size: 46px; font-weight: 600; color: #f2ead9;
+        letter-spacing: 0.01em; text-align: center;
+        -webkit-text-stroke: 3px #140d04; paint-order: stroke fill;
+      }
+      .hook {
+        position: absolute; top: 430px; left: 70px; right: 70px;
+        padding: 22px 8px;
+        text-align: center;
+        font-size: 58px; font-weight: 700; line-height: 1.28; color: #ffffff;
+        -webkit-text-stroke: 3px #140d04; paint-order: stroke fill;
+        text-shadow: 0 4px 18px rgba(0,0,0,0.85), 0 2px 6px rgba(0,0,0,0.95);
+        background: radial-gradient(72% 58% at 50% 50%,
+          rgba(10,6,2,0.34) 0%, rgba(10,6,2,0.16) 52%, rgba(10,6,2,0) 100%);
+      }
+      .season {
+        font-size: 66px; font-weight: 800; letter-spacing: 0.14em;
+        color: #e08a2b; text-transform: uppercase;
+        -webkit-text-stroke: 3px #140d04; paint-order: stroke fill;
+        text-shadow: 0 6px 22px rgba(0,0,0,0.55);
+      }
+      .hero {
+        text-align: center;
+        font-size: 68px; font-weight: 800; line-height: 1.16; color: #f5c518;
+        text-transform: uppercase; letter-spacing: 0.02em;
+        -webkit-text-stroke: 4px #140d04; paint-order: stroke fill;
+        text-shadow: 0 8px 26px rgba(0,0,0,0.6);
+      }
+      .hero-lesson { font-size: 64px; }
+      .cta {
+        position: absolute; top: 150px; left: 62px; right: 62px;
+        padding: 26px 10px;
+        text-align: center;
+        font-size: 52px; font-weight: 700; line-height: 1.3; color: #ffffff;
+        text-transform: uppercase; letter-spacing: 0.03em;
+        -webkit-text-stroke: 3px #140d04; paint-order: stroke fill;
+        text-shadow: 0 4px 18px rgba(0,0,0,0.85), 0 2px 6px rgba(0,0,0,0.95);
+        background: radial-gradient(72% 58% at 50% 50%,
+          rgba(10,6,2,0.34) 0%, rgba(10,6,2,0.16) 52%, rgba(10,6,2,0) 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="96.0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="layer plate" data-start="0.0" data-duration="8.0" data-track-index="1" data-scene="s01_courtyard">
+        <img class="kb" id="s01_courtyard-img" data-kb="s01_courtyard" src="assets/img/s01_courtyard.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="0.0" data-duration="8.0" data-track-index="2" data-scene="s01_courtyard">
+        <img class="kb-blur" src="assets/img/s01_courtyard.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="0.0" data-duration="8.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="0.0" data-duration="8.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="8.0" data-duration="6.5" data-track-index="1" data-scene="s02_step">
+        <img class="kb" id="s02_step-img" data-kb="s02_step" src="assets/img/s02_step.jpg" alt="" style="--sx:1.05;--sy:1.05;--px:-1.6%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="8.0" data-duration="6.5" data-track-index="2" data-scene="s02_step">
+        <img class="kb-blur" src="assets/img/s02_step.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="8.0" data-duration="6.5" data-track-index="4"></div>
+      <div class="layer grain" data-start="8.0" data-duration="6.5" data-track-index="5"></div>
+      <div class="layer plate" data-start="14.5" data-duration="10.0" data-track-index="1" data-scene="s03_beads">
+        <img class="kb" id="s03_beads-img" data-kb="s03_beads" src="assets/img/s03_beads.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="14.5" data-duration="10.0" data-track-index="2" data-scene="s03_beads">
+        <img class="kb-blur" src="assets/img/s03_beads.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="14.5" data-duration="10.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="14.5" data-duration="10.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="24.5" data-duration="8.0" data-track-index="1" data-scene="s04_bowl">
+        <img class="kb" id="s04_bowl-img" data-kb="s04_bowl" src="assets/img/s04_bowl.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="24.5" data-duration="8.0" data-track-index="2" data-scene="s04_bowl">
+        <img class="kb-blur" src="assets/img/s04_bowl.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="24.5" data-duration="8.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="24.5" data-duration="8.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="32.5" data-duration="10.0" data-track-index="1" data-scene="s05_folding">
+        <img class="kb" id="s05_folding-img" data-kb="s05_folding" src="assets/img/s05_folding.jpg" alt="" style="--sx:1.05;--sy:1.05;--px:-1.6%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="32.5" data-duration="10.0" data-track-index="2" data-scene="s05_folding">
+        <img class="kb-blur" src="assets/img/s05_folding.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="32.5" data-duration="10.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="32.5" data-duration="10.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="42.5" data-duration="7.0" data-track-index="1" data-scene="s06_rain_stone">
+        <img class="kb" id="s06_rain_stone-img" data-kb="s06_rain_stone" src="assets/img/s06_rain_stone.jpg" alt="" style="--sx:1.05;--sy:1.05;--px:0%;--py:-1.8%;" />
+      </div>
+      <div class="layer depth" data-start="42.5" data-duration="7.0" data-track-index="2" data-scene="s06_rain_stone">
+        <img class="kb-blur" src="assets/img/s06_rain_stone.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="42.5" data-duration="7.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="42.5" data-duration="7.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="49.5" data-duration="7.5" data-track-index="1" data-scene="s07_gate">
+        <img class="kb" id="s07_gate-img" data-kb="s07_gate" src="assets/img/s07_gate.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="49.5" data-duration="7.5" data-track-index="2" data-scene="s07_gate">
+        <img class="kb-blur" src="assets/img/s07_gate.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="49.5" data-duration="7.5" data-track-index="4"></div>
+      <div class="layer grain" data-start="49.5" data-duration="7.5" data-track-index="5"></div>
+      <div class="layer plate" data-start="57.0" data-duration="8.0" data-track-index="1" data-scene="s08_monk_reference">
+        <img class="kb" id="s08_monk_reference-img" data-kb="s08_monk_reference" src="assets/img/s08_monk_reference.jpg" alt="" style="--sx:1.05;--sy:1.05;--px:0%;--py:1.8%;" />
+      </div>
+      <div class="layer depth" data-start="57.0" data-duration="8.0" data-track-index="2" data-scene="s08_monk_reference">
+        <img class="kb-blur" src="assets/img/s08_monk_reference.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="57.0" data-duration="8.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="57.0" data-duration="8.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="65.0" data-duration="9.0" data-track-index="1" data-scene="s09_700_bowls">
+        <img class="kb" id="s09_700_bowls-img" data-kb="s09_700_bowls" src="assets/img/s09_700_bowls.jpg" alt="" style="--sx:1.1;--sy:1.1;--px:0%;--py:-1.2%;" />
+      </div>
+      <div class="layer depth" data-start="65.0" data-duration="9.0" data-track-index="2" data-scene="s09_700_bowls">
+        <img class="kb-blur" src="assets/img/s09_700_bowls.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="65.0" data-duration="9.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="65.0" data-duration="9.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="74.0" data-duration="5.5" data-track-index="1" data-scene="s10_last_bowl">
+        <img class="kb" id="s10_last_bowl-img" data-kb="s10_last_bowl" src="assets/img/s10_last_bowl.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="74.0" data-duration="5.5" data-track-index="2" data-scene="s10_last_bowl">
+        <img class="kb-blur" src="assets/img/s10_last_bowl.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="74.0" data-duration="5.5" data-track-index="4"></div>
+      <div class="layer grain" data-start="74.0" data-duration="5.5" data-track-index="5"></div>
+      <div class="layer plate" data-start="79.5" data-duration="6.0" data-track-index="1" data-scene="s11_open_hand">
+        <img class="kb" id="s11_open_hand-img" data-kb="s11_open_hand" src="assets/img/s11_open_hand.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="79.5" data-duration="6.0" data-track-index="2" data-scene="s11_open_hand">
+        <img class="kb-blur" src="assets/img/s11_open_hand.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="79.5" data-duration="6.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="79.5" data-duration="6.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="85.5" data-duration="5.0" data-track-index="1" data-scene="s12_folded_robe">
+        <img class="kb" id="s12_folded_robe-img" data-kb="s12_folded_robe" src="assets/img/s12_folded_robe.jpg" alt="" style="--sx:1.0;--sy:1.0;--px:0%;--py:0%;" />
+      </div>
+      <div class="layer depth" data-start="85.5" data-duration="5.0" data-track-index="2" data-scene="s12_folded_robe">
+        <img class="kb-blur" src="assets/img/s12_folded_robe.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="85.5" data-duration="5.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="85.5" data-duration="5.0" data-track-index="5"></div>
+      <div class="layer plate" data-start="90.5" data-duration="3.5" data-track-index="1" data-scene="s13_stone_buddha">
+        <img class="kb" id="s13_stone_buddha-img" data-kb="s13_stone_buddha" src="assets/img/s13_stone_buddha.jpg" alt="" style="--sx:1.04;--sy:1.04;--px:0%;--py:1.8%;" />
+      </div>
+      <div class="layer depth" data-start="90.5" data-duration="3.5" data-track-index="2" data-scene="s13_stone_buddha">
+        <img class="kb-blur" src="assets/img/s13_stone_buddha.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="90.5" data-duration="3.5" data-track-index="4"></div>
+      <div class="layer grain" data-start="90.5" data-duration="3.5" data-track-index="5"></div>
+      <div class="layer plate" data-start="94.0" data-duration="2.0" data-track-index="1" data-scene="s14_courtyard_dusk">
+        <img class="kb" id="s14_courtyard_dusk-img" data-kb="s14_courtyard_dusk" src="assets/img/s14_courtyard_dusk.jpg" alt="" style="--sx:1.06;--sy:1.06;--px:0%;--py:-1.2%;" />
+      </div>
+      <div class="layer depth" data-start="94.0" data-duration="2.0" data-track-index="2" data-scene="s14_courtyard_dusk">
+        <img class="kb-blur" src="assets/img/s14_courtyard_dusk.jpg" alt="" />
+      </div>
+      <div class="layer vignette" data-start="94.0" data-duration="2.0" data-track-index="4"></div>
+      <div class="layer grain" data-start="94.0" data-duration="2.0" data-track-index="5"></div>
+      <div class="layer particle" data-start="0.0" data-duration="8.0" data-track-index="6" data-scene="s01_courtyard"><canvas class="pcanvas" width="1080" height="1920" data-pseed="701"></canvas></div>
+      <div class="layer particle" data-start="8.0" data-duration="6.5" data-track-index="6" data-scene="s02_step"><canvas class="pcanvas" width="1080" height="1920" data-pseed="702"></canvas></div>
+      <div class="layer particle" data-start="14.5" data-duration="10.0" data-track-index="6" data-scene="s03_beads"><canvas class="pcanvas" width="1080" height="1920" data-pseed="703"></canvas></div>
+      <div class="layer particle" data-start="24.5" data-duration="8.0" data-track-index="6" data-scene="s04_bowl"><canvas class="pcanvas" width="1080" height="1920" data-pseed="704"></canvas></div>
+      <div class="layer particle" data-start="32.5" data-duration="10.0" data-track-index="6" data-scene="s05_folding"><canvas class="pcanvas" width="1080" height="1920" data-pseed="705"></canvas></div>
+      <div class="layer particle" data-start="42.5" data-duration="7.0" data-track-index="6" data-scene="s06_rain_stone"><canvas class="pcanvas" width="1080" height="1920" data-pseed="706"></canvas></div>
+      <div class="layer particle" data-start="49.5" data-duration="7.5" data-track-index="6" data-scene="s07_gate"><canvas class="pcanvas" width="1080" height="1920" data-pseed="707"></canvas></div>
+      <div class="layer particle" data-start="57.0" data-duration="8.0" data-track-index="6" data-scene="s08_monk_reference"><canvas class="pcanvas" width="1080" height="1920" data-pseed="708"></canvas></div>
+      <div class="layer particle" data-start="65.0" data-duration="9.0" data-track-index="6" data-scene="s09_700_bowls"><canvas class="pcanvas" width="1080" height="1920" data-pseed="709"></canvas></div>
+      <div class="layer particle" data-start="74.0" data-duration="5.5" data-track-index="6" data-scene="s10_last_bowl"><canvas class="pcanvas" width="1080" height="1920" data-pseed="710"></canvas></div>
+      <div class="layer particle" data-start="79.5" data-duration="6.0" data-track-index="6" data-scene="s11_open_hand"><canvas class="pcanvas" width="1080" height="1920" data-pseed="711"></canvas></div>
+      <div class="layer particle" data-start="85.5" data-duration="5.0" data-track-index="6" data-scene="s12_folded_robe"><canvas class="pcanvas" width="1080" height="1920" data-pseed="712"></canvas></div>
+      <div class="layer particle" data-start="90.5" data-duration="3.5" data-track-index="6" data-scene="s13_stone_buddha"><canvas class="pcanvas" width="1080" height="1920" data-pseed="713"></canvas></div>
+      <div class="layer particle" data-start="94.0" data-duration="2.0" data-track-index="6" data-scene="s14_courtyard_dusk"><canvas class="pcanvas" width="1080" height="1920" data-pseed="714"></canvas></div>
+      <div class="layer overlay" data-start="0" data-duration="6.5" data-track-index="10">
+        <div class="title-wrap">
+          <div class="title-line t1" id="title-l1">NHÀ SƯ VÀ</div>
+          <div class="title-line t2" id="title-l2">CHIẾC BÁT RỖNG</div>
+          <div class="subtitle" id="subtitle">Câu chuyện khiến ai cũng nhìn lại</div>
+        </div>
+      </div>
+      <div class="layer overlay" data-start="0.5" data-duration="6.0" data-track-index="11">
+        <div class="hook" id="hook">Bạn đang chờ đến khi nào thì mới thấy mình đủ?</div>
+      </div>
+      <div class="layer overlay" data-start="34.0" data-duration="3.2" data-track-index="12"><div class="season" id="season_spring">MÙA XUÂN</div></div>
+      <div class="layer overlay" data-start="44.0" data-duration="3.2" data-track-index="12"><div class="season" id="season_rain">MÙA HẠ</div></div>
+      <div class="layer overlay" data-start="51.0" data-duration="3.2" data-track-index="12"><div class="season" id="season_autumn">MÙA THU</div></div>
+      <div class="layer overlay" data-start="66.0" data-duration="6.0" data-track-index="13"><div class="hero hero-700" id="hero700">700 CHIẾC BÁT<br />0 CHUYẾN ĐI</div></div>
+      <div class="layer overlay" data-start="80.2" data-duration="6.0" data-track-index="14"><div class="hero hero-lesson" id="heroLesson">ĐỦ LÀ MỘT QUYẾT ĐỊNH</div></div>
+      <div class="layer overlay" data-start="94.0" data-duration="2.0" data-track-index="15"><div class="cta" id="cta">HÀNH TRÌNH VẠN DẶM<br />BẮT ĐẦU TỪ MỘT BƯỚC CHÂN</div></div>
+      <div class="layer overlay caption-layer" data-start="0.5" data-duration="3.2667" data-track-index="16" data-caption="cap0"><div class="caption"><div class="cline"><span class="cw" id="cap0w0">Bạn</span> <span class="cw" id="cap0w1">đang</span> <span class="cw" id="cap0w2">chờ</span> <span class="cw" id="cap0w3">đến</span> <span class="cw" id="cap0w4">khi</span> <span class="cw" id="cap0w5">nào</span> <span class="cw" id="cap0w6">thì</span></div><div class="cline"><span class="cw" id="cap0w7">mới</span> <span class="cw" id="cap0w8">thấy</span> <span class="cw" id="cap0w9">mình</span> <span class="cw" id="cap0w10">đủ?</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="4.0667" data-duration="3.7666" data-track-index="16" data-caption="cap1"><div class="caption"><div class="cline"><span class="cw" id="cap1w0">Một</span> <span class="cw" id="cap1w1">chiếc</span> <span class="cw" id="cap1w2">bát</span> <span class="cw" id="cap1w3">rỗng</span> <span class="cw" id="cap1w4">đã</span> <span class="cw" id="cap1w5">đi</span> <span class="cw" id="cap1w6">trước</span></div><div class="cline"><span class="cw" id="cap1w7">bạn</span> <span class="cw" id="cap1w8">ba</span> <span class="cw" id="cap1w9">năm.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="9.4" data-duration="3.2667" data-track-index="16" data-caption="cap2"><div class="caption"><div class="cline"><span class="cw" id="cap2w0">Ở</span> <span class="cw" id="cap2w1">một</span> <span class="cw" id="cap2w2">ngôi</span> <span class="cw" id="cap2w3">chùa</span> <span class="cw" id="cap2w4">cổ,</span> <span class="cw" id="cap2w5">có</span> <span class="cw" id="cap2w6">ba</span> <span class="cw" id="cap2w7">nhà</span></div><div class="cline"><span class="cw" id="cap2w8">sư</span> <span class="cw" id="cap2w9">cùng</span> <span class="cw" id="cap2w10">ấp</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="12.7667" data-duration="1.4333" data-track-index="16" data-caption="cap3"><div class="caption"><div class="cline"><span class="cw" id="cap3w0">ủ</span> <span class="cw" id="cap3w1">một</span> <span class="cw" id="cap3w2">giấc</span> <span class="cw" id="cap3w3">mơ:</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="14.2333" data-duration="2.0334" data-track-index="16" data-caption="cap4"><div class="caption"><div class="cline"><span class="cw" id="cap4w0">hành</span> <span class="cw" id="cap4w1">hương</span> <span class="cw" id="cap4w2">đến</span> <span class="cw" id="cap4w3">đất</span> <span class="cw" id="cap4w4">Phật.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="16.3333" data-duration="1.6334" data-track-index="16" data-caption="cap5"><div class="caption"><div class="cline"><span class="cw" id="cap5w0">Sư</span> <span class="cw" id="cap5w1">cả</span> <span class="cw" id="cap5w2">nói:</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="18.0" data-duration="2.5333" data-track-index="16" data-caption="cap6"><div class="caption"><div class="cline"><span class="cw" id="cap6w0">ta</span> <span class="cw" id="cap6w1">phải</span> <span class="cw" id="cap6w2">chuẩn</span> <span class="cw" id="cap6w3">bị</span> <span class="cw" id="cap6w4">cho</span> <span class="cw" id="cap6w5">thật</span> <span class="cw" id="cap6w6">đầy</span></div><div class="cline"><span class="cw" id="cap6w7">đủ.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="20.5667" data-duration="2.2333" data-track-index="16" data-caption="cap7"><div class="caption"><div class="cline"><span class="cw" id="cap7w0">Sư</span> <span class="cw" id="cap7w1">nghèo</span> <span class="cw" id="cap7w2">chỉ</span> <span class="cw" id="cap7w3">có</span> <span class="cw" id="cap7w4">một</span> <span class="cw" id="cap7w5">chiếc</span> <span class="cw" id="cap7w6">bát.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="24.4" data-duration="2.5667" data-track-index="16" data-caption="cap8"><div class="caption"><div class="cline"><span class="cw" id="cap8w0">Mùa</span> <span class="cw" id="cap8w1">xuân,</span> <span class="cw" id="cap8w2">sư</span> <span class="cw" id="cap8w3">cả</span> <span class="cw" id="cap8w4">đóng</span> <span class="cw" id="cap8w5">gói.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="27.0" data-duration="4.0333" data-track-index="16" data-caption="cap9"><div class="caption"><div class="cline"><span class="cw" id="cap9w0">Mùa</span> <span class="cw" id="cap9w1">hạ,</span> <span class="cw" id="cap9w2">sư</span> <span class="cw" id="cap9w3">cả</span> <span class="cw" id="cap9w4">đợi</span> <span class="cw" id="cap9w5">thêm</span> <span class="cw" id="cap9w6">một</span></div><div class="cline"><span class="cw" id="cap9w7">người</span> <span class="cw" id="cap9w8">bạn</span> <span class="cw" id="cap9w9">đồng</span> <span class="cw" id="cap9w10">hành.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="31.0667" data-duration="3.5666" data-track-index="16" data-caption="cap10"><div class="caption"><div class="cline"><span class="cw" id="cap10w0">Mùa</span> <span class="cw" id="cap10w1">thu,</span> <span class="cw" id="cap10w2">sư</span> <span class="cw" id="cap10w3">cả</span> <span class="cw" id="cap10w4">đợi</span> <span class="cw" id="cap10w5">con</span> <span class="cw" id="cap10w6">đường</span></div><div class="cline"><span class="cw" id="cap10w7">bớt</span> <span class="cw" id="cap10w8">mưa.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="35.1333" data-duration="2.5667" data-track-index="16" data-caption="cap11"><div class="caption"><div class="cline"><span class="cw" id="cap11w0">Sư</span> <span class="cw" id="cap11w1">nghèo</span> <span class="cw" id="cap11w2">thì</span> <span class="cw" id="cap11w3">không</span> <span class="cw" id="cap11w4">đợi</span> <span class="cw" id="cap11w5">gì</span> <span class="cw" id="cap11w6">cả.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="38.0667" data-duration="3.5666" data-track-index="16" data-caption="cap12"><div class="caption"><div class="cline"><span class="cw" id="cap12w0">Một</span> <span class="cw" id="cap12w1">buổi</span> <span class="cw" id="cap12w2">sáng,</span> <span class="cw" id="cap12w3">ông</span> <span class="cw" id="cap12w4">cầm</span> <span class="cw" id="cap12w5">chiếc</span></div><div class="cline"><span class="cw" id="cap12w6">bát,</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="41.6667" data-duration="2.7666" data-track-index="16" data-caption="cap13"><div class="caption"><div class="cline"><span class="cw" id="cap13w0">đi</span> <span class="cw" id="cap13w1">ra</span> <span class="cw" id="cap13w2">cổng</span> <span class="cw" id="cap13w3">chùa,</span> <span class="cw" id="cap13w4">và</span> <span class="cw" id="cap13w5">không</span> <span class="cw" id="cap13w6">quay</span></div><div class="cline"><span class="cw" id="cap13w7">lại.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="46.0333" data-duration="2.6667" data-track-index="16" data-caption="cap14"><div class="caption"><div class="cline"><span class="cw" id="cap14w0">Ba</span> <span class="cw" id="cap14w1">năm</span> <span class="cw" id="cap14w2">sau,</span> <span class="cw" id="cap14w3">sư</span> <span class="cw" id="cap14w4">nghèo</span> <span class="cw" id="cap14w5">trở</span> <span class="cw" id="cap14w6">về.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="48.7333" data-duration="3.0667" data-track-index="16" data-caption="cap15"><div class="caption"><div class="cline"><span class="cw" id="cap15w0">Áo</span> <span class="cw" id="cap15w1">bạc</span> <span class="cw" id="cap15w2">màu,</span> <span class="cw" id="cap15w3">chân</span> <span class="cw" id="cap15w4">chai</span> <span class="cw" id="cap15w5">sạn,</span></div><div class="cline"><span class="cw" id="cap15w6">nhưng</span> <span class="cw" id="cap15w7">mắt</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="51.9" data-duration="2.8" data-track-index="16" data-caption="cap16"><div class="caption"><div class="cline"><span class="cw" id="cap16w0">sáng</span> <span class="cw" id="cap16w1">như</span> <span class="cw" id="cap16w2">người</span> <span class="cw" id="cap16w3">vừa</span> <span class="cw" id="cap16w4">nhìn</span> <span class="cw" id="cap16w5">thấy</span></div><div class="cline"><span class="cw" id="cap16w6">điều</span> <span class="cw" id="cap16w7">gì</span> <span class="cw" id="cap16w8">đó.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="55.1333" data-duration="2.1" data-track-index="16" data-caption="cap17"><div class="caption"><div class="cline"><span class="cw" id="cap17w0">Sư</span> <span class="cw" id="cap17w1">cả</span> <span class="cw" id="cap17w2">vẫn</span> <span class="cw" id="cap17w3">ở</span> <span class="cw" id="cap17w4">đó.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="57.2667" data-duration="3.0333" data-track-index="16" data-caption="cap18"><div class="caption"><div class="cline"><span class="cw" id="cap18w0">Và</span> <span class="cw" id="cap18w1">trong</span> <span class="cw" id="cap18w2">kho,</span> <span class="cw" id="cap18w3">có</span> <span class="cw" id="cap18w4">bảy</span> <span class="cw" id="cap18w5">trăm</span></div><div class="cline"><span class="cw" id="cap18w6">chiếc</span> <span class="cw" id="cap18w7">bát,</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="60.3667" data-duration="3.3" data-track-index="16" data-caption="cap19"><div class="caption"><div class="cline"><span class="cw" id="cap19w0">những</span> <span class="cw" id="cap19w1">thứ</span> <span class="cw" id="cap19w2">ông</span> <span class="cw" id="cap19w3">gom</span> <span class="cw" id="cap19w4">thêm,</span> <span class="cw" id="cap19w5">để</span></div><div class="cline"><span class="cw" id="cap19w6">dành</span> <span class="cw" id="cap19w7">cho</span> <span class="cw" id="cap19w8">chuyến</span> <span class="cw" id="cap19w9">đi.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="65.2667" data-duration="2.3333" data-track-index="16" data-caption="cap20"><div class="caption"><div class="cline"><span class="cw" id="cap20w0">Đủ</span> <span class="cw" id="cap20w1">không</span> <span class="cw" id="cap20w2">phải</span> <span class="cw" id="cap20w3">là</span> <span class="cw" id="cap20w4">một</span> <span class="cw" id="cap20w5">con</span> <span class="cw" id="cap20w6">số.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="67.6333" data-duration="2.0667" data-track-index="16" data-caption="cap21"><div class="caption"><div class="cline"><span class="cw" id="cap21w0">Đủ</span> <span class="cw" id="cap21w1">là</span> <span class="cw" id="cap21w2">một</span> <span class="cw" id="cap21w3">quyết</span> <span class="cw" id="cap21w4">định.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="69.7333" data-duration="3.1334" data-track-index="16" data-caption="cap22"><div class="caption"><div class="cline"><span class="cw" id="cap22w0">Chiếc</span> <span class="cw" id="cap22w1">bát</span> <span class="cw" id="cap22w2">của</span> <span class="cw" id="cap22w3">sư</span> <span class="cw" id="cap22w4">nghèo</span> <span class="cw" id="cap22w5">rỗng</span></div><div class="cline"><span class="cw" id="cap22w6">không</span> <span class="cw" id="cap22w7">phải</span> <span class="cw" id="cap22w8">vì</span> <span class="cw" id="cap22w9">ông</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="72.9" data-duration="3.2667" data-track-index="16" data-caption="cap23"><div class="caption"><div class="cline"><span class="cw" id="cap23w0">không</span> <span class="cw" id="cap23w1">có</span> <span class="cw" id="cap23w2">gì,</span> <span class="cw" id="cap23w3">mà</span> <span class="cw" id="cap23w4">vì</span> <span class="cw" id="cap23w5">ông</span> <span class="cw" id="cap23w6">đã</span> <span class="cw" id="cap23w7">chọn</span></div><div class="cline"><span class="cw" id="cap23w8">như</span> <span class="cw" id="cap23w9">vậy.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="77.7667" data-duration="2.2333" data-track-index="16" data-caption="cap24"><div class="caption"><div class="cline"><span class="cw" id="cap24w0">Bạn</span> <span class="cw" id="cap24w1">cũng</span> <span class="cw" id="cap24w2">đang</span> <span class="cw" id="cap24w3">giữ</span> <span class="cw" id="cap24w4">một</span> <span class="cw" id="cap24w5">chiếc</span></div><div class="cline"><span class="cw" id="cap24w6">bát:</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="80.0333" data-duration="3.4334" data-track-index="16" data-caption="cap25"><div class="caption"><div class="cline"><span class="cw" id="cap25w0">một</span> <span class="cw" id="cap25w1">dự</span> <span class="cw" id="cap25w2">án,</span> <span class="cw" id="cap25w3">một</span> <span class="cw" id="cap25w4">lời</span> <span class="cw" id="cap25w5">xin</span> <span class="cw" id="cap25w6">lỗi,</span></div><div class="cline"><span class="cw" id="cap25w7">một</span> <span class="cw" id="cap25w8">chuyến</span> <span class="cw" id="cap25w9">đi.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="83.5333" data-duration="2.6334" data-track-index="16" data-caption="cap26"><div class="caption"><div class="cline"><span class="cw" id="cap26w0">Nhưng</span> <span class="cw" id="cap26w1">cái</span> <span class="cw" id="cap26w2">bát</span> <span class="cw" id="cap26w3">không</span> <span class="cw" id="cap26w4">đưa</span> <span class="cw" id="cap26w5">bạn</span></div><div class="cline"><span class="cw" id="cap26w6">tới</span> <span class="cw" id="cap26w7">đâu</span> <span class="cw" id="cap26w8">cả.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="86.2" data-duration="2.8333" data-track-index="16" data-caption="cap27"><div class="caption"><div class="cline"><span class="cw" id="cap27w0">Chỉ</span> <span class="cw" id="cap27w1">có</span> <span class="cw" id="cap27w2">bước</span> <span class="cw" id="cap27w3">chân</span> <span class="cw" id="cap27w4">mới</span> <span class="cw" id="cap27w5">làm</span> <span class="cw" id="cap27w6">được</span></div><div class="cline"><span class="cw" id="cap27w7">điều</span> <span class="cw" id="cap27w8">đó.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="90.6333" data-duration="1.9" data-track-index="16" data-caption="cap28"><div class="caption"><div class="cline"><span class="cw" id="cap28w0">Vậy,</span> <span class="cw" id="cap28w1">bạn</span> <span class="cw" id="cap28w2">còn</span> <span class="cw" id="cap28w3">chờ</span> <span class="cw" id="cap28w4">gì</span> <span class="cw" id="cap28w5">nữa?</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="92.6" data-duration="1.2" data-track-index="16" data-caption="cap29"><div class="caption"><div class="cline"><span class="cw" id="cap29w0">Bát</span> <span class="cw" id="cap29w1">rỗng</span> <span class="cw" id="cap29w2">rồi.</span></div></div></div>
+      <div class="layer overlay caption-layer" data-start="93.8333" data-duration="0.7667" data-track-index="16" data-caption="cap30"><div class="caption"><div class="cline"><span class="cw" id="cap30w0">Đi</span> <span class="cw" id="cap30w1">thôi.</span></div></div></div>
+      <audio id="narr-01_hook" src="assets/audio/01_hook.mp3" data-start="0.5" data-duration="7.9333" data-track-index="20" preload="auto"></audio>
+      <audio id="narr-02_context" src="assets/audio/02_context.mp3" data-start="9.4" data-duration="14.0" data-track-index="20" preload="auto"></audio>
+      <audio id="narr-03_development" src="assets/audio/03_development.mp3" data-start="24.4" data-duration="20.6667" data-track-index="20" preload="auto"></audio>
+      <audio id="narr-04_twist" src="assets/audio/04_twist.mp3" data-start="46.0333" data-duration="18.2667" data-track-index="20" preload="auto"></audio>
+      <audio id="narr-05_lesson" src="assets/audio/05_lesson.mp3" data-start="65.2667" data-duration="11.5333" data-track-index="20" preload="auto"></audio>
+      <audio id="narr-06_reflection" src="assets/audio/06_reflection.mp3" data-start="77.7667" data-duration="11.9" data-track-index="20" preload="auto"></audio>
+      <audio id="narr-07_cta" src="assets/audio/07_cta.mp3" data-start="90.6333" data-duration="4.5667" data-track-index="20" preload="auto"></audio>
+      <audio id="music" src="assets/audio/bed.mp3" data-start="0" data-duration="96.0" data-track-index="21" preload="auto"></audio>
+    </div>
+    <script>
+{
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+
+  // Deterministic particle fields. All positions derive from the scene seed and
+  // the frame number, so any seek reproduces the same frame.
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function drawParticles(scene, t) {
+    var canvas = scene.querySelector("canvas.pcanvas");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    var seed = parseInt(canvas.dataset.pseed, 10) || 1;
+    var W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // leaves
+    ctx.globalCompositeOperation = "source-over";
+    for (var i = 0; i < 34; i++) {
+      var r = mulberry32(seed * 977 + i);
+      var x0 = r() * W, speed = 26 + r() * 52, drift = (r() - 0.5) * 46;
+      var phase = r() * Math.PI * 2, size = 7 + r() * 13, spin = (r() - 0.5) * 1.6;
+      var y = ((r() * H + t * speed) % (H + 160)) - 80;
+      var x = x0 + Math.sin(t * 0.45 + phase) * drift;
+      var rot = t * spin + phase;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.globalAlpha = 0.30 + 0.28 * Math.abs(Math.sin(t * 0.6 + phase));
+      ctx.fillStyle = i % 3 === 0 ? "#e8b64a" : "#c98b2e";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, size, size * 0.42, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // drifting dust motes in the light
+    for (var j = 0; j < 46; j++) {
+      var rd = mulberry32(seed * 613 + j);
+      var dx = rd() * W, dy0 = rd() * H, ds = 8 + rd() * 20;
+      var ddrift = (rd() - 0.5) * 26;
+      var dy = (dy0 - t * ds + H * 4) % H;
+      var dxn = dx + Math.sin(t * 0.3 + j) * ddrift;
+      ctx.globalAlpha = 0.10 + 0.16 * Math.abs(Math.sin(t * 0.8 + j * 0.7));
+      ctx.fillStyle = "#ffe9b0";
+      ctx.beginPath();
+      ctx.arc(dxn, dy, 1.1 + (j % 3) * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // incense smoke, bottom-anchored, slow upward curl
+    ctx.globalAlpha = 1;
+    for (var k = 0; k < 5; k++) {
+      var rs = mulberry32(seed * 331 + k);
+      var baseX = W * (0.34 + rs() * 0.34);
+      var rise = 54 + rs() * 40;
+      var sy = H - (((t * rise + rs() * H) % (H * 0.85)));
+      var sx = baseX + Math.sin(t * 0.35 + k * 1.7) * (30 + k * 10);
+      var rad = 90 + ((H - sy) / H) * 230;
+      var grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad);
+      grad.addColorStop(0, "rgba(255,244,222," + (0.055 - k * 0.008) + ")");
+      grad.addColorStop(1, "rgba(255,244,222,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(sx, sy, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Scene visibility + particle drawing, driven by the timeline so every seek
+  // reproduces the same frame.
+  const scenes = Array.from(document.querySelectorAll(".particle"));
+  const timelineSeconds = 96.0;
+  const FPS = 30;
+
+  function applyFrame(seconds) {
+    scenes.forEach(function (scene) {
+      const start = parseFloat(scene.dataset.start);
+      const dur = parseFloat(scene.dataset.duration);
+      const local = seconds - start;
+      const active = local >= 0 && local < dur;
+      scene.style.opacity = active ? "1" : "0";
+      if (active) drawParticles(scene, local);
+    });
+  }
+
+  tl.eventCallback("onUpdate", function () {
+    applyFrame(tl.time());
+  });
+
+  tl.fromTo("[data-kb=\"s01_courtyard\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.07, "--sy": 1.07, "--px": "0%", "--py": "-1.2%"}, {duration: 8.0, ease: "none"}), 0.0);
+  tl.fromTo("[data-kb=\"s01_courtyard\"]", {"--flicker": 0}, {"--flicker": 1, duration: 8.0, ease: "sine.inOut"}, 0.0);
+  tl.fromTo("[data-scene=\"s01_courtyard\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 4.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 0.0);
+  tl.fromTo("[data-kb=\"s02_step\"]", {"--sx": 1.05, "--sy": 1.05, "--px": "-1.6%", "--py": "0%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "1.6%", "--py": "0%"}, {duration: 6.5, ease: "none"}), 8.0);
+  tl.fromTo("[data-kb=\"s02_step\"]", {"--flicker": 0}, {"--flicker": 1, duration: 6.5, ease: "sine.inOut"}, 8.0);
+  tl.fromTo("[data-scene=\"s02_step\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 3.25, yoyo: true, repeat: 1, ease: "sine.inOut"}, 8.0);
+  tl.fromTo("[data-kb=\"s03_beads\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "-1.2%"}, {duration: 10.0, ease: "none"}), 14.5);
+  tl.fromTo("[data-kb=\"s03_beads\"]", {"--flicker": 0}, {"--flicker": 1, duration: 10.0, ease: "sine.inOut"}, 14.5);
+  tl.fromTo("[data-scene=\"s03_beads\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 5.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 14.5);
+  tl.fromTo("[data-kb=\"s04_bowl\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.09, "--sy": 1.09, "--px": "0%", "--py": "0%"}, {duration: 8.0, ease: "none"}), 24.5);
+  tl.fromTo("[data-kb=\"s04_bowl\"]", {"--flicker": 0}, {"--flicker": 1, duration: 8.0, ease: "sine.inOut"}, 24.5);
+  tl.fromTo("[data-scene=\"s04_bowl\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 4.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 24.5);
+  tl.fromTo("[data-kb=\"s05_folding\"]", {"--sx": 1.05, "--sy": 1.05, "--px": "-1.6%", "--py": "0%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "1.6%", "--py": "0%"}, {duration: 10.0, ease: "none"}), 32.5);
+  tl.fromTo("[data-kb=\"s05_folding\"]", {"--flicker": 0}, {"--flicker": 1, duration: 10.0, ease: "sine.inOut"}, 32.5);
+  tl.fromTo("[data-scene=\"s05_folding\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 5.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 32.5);
+  tl.fromTo("[data-kb=\"s06_rain_stone\"]", {"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "-1.8%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "1.8%"}, {duration: 7.0, ease: "none"}), 42.5);
+  tl.fromTo("[data-kb=\"s06_rain_stone\"]", {"--flicker": 0}, {"--flicker": 1, duration: 7.0, ease: "sine.inOut"}, 42.5);
+  tl.fromTo("[data-scene=\"s06_rain_stone\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 3.50, yoyo: true, repeat: 1, ease: "sine.inOut"}, 42.5);
+  tl.fromTo("[data-kb=\"s07_gate\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.06, "--sy": 1.06, "--px": "0%", "--py": "-1.2%"}, {duration: 7.5, ease: "none"}), 49.5);
+  tl.fromTo("[data-kb=\"s07_gate\"]", {"--flicker": 0}, {"--flicker": 1, duration: 7.5, ease: "sine.inOut"}, 49.5);
+  tl.fromTo("[data-scene=\"s07_gate\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 3.75, yoyo: true, repeat: 1, ease: "sine.inOut"}, 49.5);
+  tl.fromTo("[data-kb=\"s08_monk_reference\"]", {"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "1.8%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "-1.8%"}, {duration: 8.0, ease: "none"}), 57.0);
+  tl.fromTo("[data-kb=\"s08_monk_reference\"]", {"--flicker": 0}, {"--flicker": 1, duration: 8.0, ease: "sine.inOut"}, 57.0);
+  tl.fromTo("[data-scene=\"s08_monk_reference\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 4.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 57.0);
+  tl.fromTo("[data-kb=\"s09_700_bowls\"]", {"--sx": 1.1, "--sy": 1.1, "--px": "0%", "--py": "-1.2%"}, Object.assign({"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, {duration: 9.0, ease: "none"}), 65.0);
+  tl.fromTo("[data-kb=\"s09_700_bowls\"]", {"--flicker": 0}, {"--flicker": 1, duration: 9.0, ease: "sine.inOut"}, 65.0);
+  tl.fromTo("[data-scene=\"s09_700_bowls\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 4.50, yoyo: true, repeat: 1, ease: "sine.inOut"}, 65.0);
+  tl.fromTo("[data-kb=\"s10_last_bowl\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.08, "--sy": 1.08, "--px": "0%", "--py": "0%"}, {duration: 5.5, ease: "none"}), 74.0);
+  tl.fromTo("[data-kb=\"s10_last_bowl\"]", {"--flicker": 0}, {"--flicker": 1, duration: 5.5, ease: "sine.inOut"}, 74.0);
+  tl.fromTo("[data-scene=\"s10_last_bowl\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 2.75, yoyo: true, repeat: 1, ease: "sine.inOut"}, 74.0);
+  tl.fromTo("[data-kb=\"s11_open_hand\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "-1.2%"}, {duration: 6.0, ease: "none"}), 79.5);
+  tl.fromTo("[data-kb=\"s11_open_hand\"]", {"--flicker": 0}, {"--flicker": 1, duration: 6.0, ease: "sine.inOut"}, 79.5);
+  tl.fromTo("[data-scene=\"s11_open_hand\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 3.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 79.5);
+  tl.fromTo("[data-kb=\"s12_folded_robe\"]", {"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, Object.assign({"--sx": 1.05, "--sy": 1.05, "--px": "0%", "--py": "-1.2%"}, {duration: 5.0, ease: "none"}), 85.5);
+  tl.fromTo("[data-kb=\"s12_folded_robe\"]", {"--flicker": 0}, {"--flicker": 1, duration: 5.0, ease: "sine.inOut"}, 85.5);
+  tl.fromTo("[data-scene=\"s12_folded_robe\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 2.50, yoyo: true, repeat: 1, ease: "sine.inOut"}, 85.5);
+  tl.fromTo("[data-kb=\"s13_stone_buddha\"]", {"--sx": 1.04, "--sy": 1.04, "--px": "0%", "--py": "1.8%"}, Object.assign({"--sx": 1.04, "--sy": 1.04, "--px": "0%", "--py": "-1.8%"}, {duration: 3.5, ease: "none"}), 90.5);
+  tl.fromTo("[data-kb=\"s13_stone_buddha\"]", {"--flicker": 0}, {"--flicker": 1, duration: 3.5, ease: "sine.inOut"}, 90.5);
+  tl.fromTo("[data-scene=\"s13_stone_buddha\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 1.75, yoyo: true, repeat: 1, ease: "sine.inOut"}, 90.5);
+  tl.fromTo("[data-kb=\"s14_courtyard_dusk\"]", {"--sx": 1.06, "--sy": 1.06, "--px": "0%", "--py": "-1.2%"}, Object.assign({"--sx": 1.0, "--sy": 1.0, "--px": "0%", "--py": "0%"}, {duration: 2.0, ease: "none"}), 94.0);
+  tl.fromTo("[data-kb=\"s14_courtyard_dusk\"]", {"--flicker": 0}, {"--flicker": 1, duration: 2.0, ease: "sine.inOut"}, 94.0);
+  tl.fromTo("[data-scene=\"s14_courtyard_dusk\"] .depth", {opacity: 0.30}, {opacity: 0.46, duration: 1.00, yoyo: true, repeat: 1, ease: "sine.inOut"}, 94.0);
+  tl.fromTo("#title-l1", {scale: 0.82, opacity: 0}, {scale: 1, opacity: 1, duration: 0.25, ease: "back.out(2)"}, 0);
+  tl.fromTo("#title-l2", {scale: 0.82, opacity: 0}, {scale: 1, opacity: 1, duration: 0.25, ease: "back.out(2)"}, 0.15);
+  tl.fromTo("#subtitle", {opacity: 0, y: 18}, {opacity: 1, y: 0, duration: 0.35, ease: "power2.out"}, 0.35);
+  tl.to(["#title-l1", "#title-l2", "#subtitle"], {opacity: 0, scale: 0.96, duration: 0.4, ease: "power2.in"}, 5.6);
+  tl.fromTo("#hook", {opacity: 0}, {opacity: 1, duration: 0.35}, 0.5);
+  tl.to("#hook", {opacity: 0, duration: 0.4}, 5.8);
+  tl.fromTo("#season_spring", {opacity: 0, scale: 0.9}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)"}, 34.0);
+  tl.to("#season_spring", {opacity: 0, duration: 0.45}, 36.6);
+  tl.fromTo("#season_rain", {opacity: 0, scale: 0.9}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)"}, 44.0);
+  tl.to("#season_rain", {opacity: 0, duration: 0.45}, 46.6);
+  tl.fromTo("#season_autumn", {opacity: 0, scale: 0.9}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)"}, 51.0);
+  tl.to("#season_autumn", {opacity: 0, duration: 0.45}, 53.6);
+  tl.fromTo("#hero700", {opacity: 0, scale: 0.86}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)"}, 66.0);
+  tl.to("#hero700", {opacity: 0, duration: 0.5}, 70.8);
+  tl.fromTo("#heroLesson", {opacity: 0, scale: 0.86}, {opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)"}, 80.2);
+  tl.to("#heroLesson", {opacity: 0, duration: 0.5}, 84.5);
+  tl.fromTo("#cta", {opacity: 0, y: 22}, {opacity: 1, y: 0, duration: 0.5, ease: "power2.out"}, 94.1);
+  tl.to("#cta", {opacity: 1, duration: 1.0}, 95.0);
+  tl.set("[data-caption=\"cap0\"]", {autoAlpha: 1}, 0.5);
+  tl.set("[data-caption=\"cap0\"]", {autoAlpha: 0}, 3.7667);
+  tl.set("#cap0w0", {color: "#F5C518"}, 0.5);
+  tl.set("#cap0w0", {color: "#FFFFFF"}, 0.8);
+  tl.set("#cap0w1", {color: "#F5C518"}, 0.8333);
+  tl.set("#cap0w1", {color: "#FFFFFF"}, 1.0667);
+  tl.set("#cap0w2", {color: "#F5C518"}, 1.1333);
+  tl.set("#cap0w2", {color: "#FFFFFF"}, 1.2667);
+  tl.set("#cap0w3", {color: "#F5C518"}, 1.3333);
+  tl.set("#cap0w3", {color: "#FFFFFF"}, 1.5667);
+  tl.set("#cap0w4", {color: "#F5C518"}, 1.6);
+  tl.set("#cap0w4", {color: "#FFFFFF"}, 1.7667);
+  tl.set("#cap0w5", {color: "#F5C518"}, 1.8333);
+  tl.set("#cap0w5", {color: "#FFFFFF"}, 2.1333);
+  tl.set("#cap0w6", {color: "#F5C518"}, 2.2);
+  tl.set("#cap0w6", {color: "#FFFFFF"}, 2.4333);
+  tl.set("#cap0w7", {color: "#F5C518"}, 2.5);
+  tl.set("#cap0w7", {color: "#FFFFFF"}, 2.7333);
+  tl.set("#cap0w8", {color: "#F5C518"}, 2.7667);
+  tl.set("#cap0w8", {color: "#FFFFFF"}, 3.0);
+  tl.set("#cap0w9", {color: "#F5C518"}, 3.0667);
+  tl.set("#cap0w9", {color: "#FFFFFF"}, 3.3);
+  tl.set("#cap0w10", {color: "#F5C518"}, 3.4333);
+  tl.set("#cap0w10", {color: "#FFFFFF"}, 3.7667);
+  tl.set("[data-caption=\"cap1\"]", {autoAlpha: 1}, 4.0667);
+  tl.set("[data-caption=\"cap1\"]", {autoAlpha: 0}, 7.8333);
+  tl.set("#cap1w0", {color: "#F5C518"}, 4.0667);
+  tl.set("#cap1w0", {color: "#FFFFFF"}, 4.9333);
+  tl.set("#cap1w1", {color: "#F5C518"}, 4.9667);
+  tl.set("#cap1w1", {color: "#FFFFFF"}, 5.2333);
+  tl.set("#cap1w2", {color: "#F5C518"}, 5.2667);
+  tl.set("#cap1w2", {color: "#FFFFFF"}, 5.4);
+  tl.set("#cap1w3", {color: "#F5C518"}, 5.5667);
+  tl.set("#cap1w3", {color: "#FFFFFF"}, 5.9);
+  tl.set("#cap1w4", {color: "#F5C518"}, 6.0);
+  tl.set("#cap1w4", {color: "#FFFFFF"}, 6.2);
+  tl.set("#cap1w5", {color: "#F5C518"}, 6.3);
+  tl.set("#cap1w5", {color: "#FFFFFF"}, 6.4667);
+  tl.set("#cap1w6", {color: "#F5C518"}, 6.5333);
+  tl.set("#cap1w6", {color: "#FFFFFF"}, 6.7667);
+  tl.set("#cap1w7", {color: "#F5C518"}, 6.8333);
+  tl.set("#cap1w7", {color: "#FFFFFF"}, 7.0667);
+  tl.set("#cap1w8", {color: "#F5C518"}, 7.1667);
+  tl.set("#cap1w8", {color: "#FFFFFF"}, 7.3333);
+  tl.set("#cap1w9", {color: "#F5C518"}, 7.4333);
+  tl.set("#cap1w9", {color: "#FFFFFF"}, 7.8333);
+  tl.set("[data-caption=\"cap2\"]", {autoAlpha: 1}, 9.4);
+  tl.set("[data-caption=\"cap2\"]", {autoAlpha: 0}, 12.6667);
+  tl.set("#cap2w0", {color: "#F5C518"}, 9.4);
+  tl.set("#cap2w0", {color: "#FFFFFF"}, 9.6333);
+  tl.set("#cap2w1", {color: "#F5C518"}, 9.6667);
+  tl.set("#cap2w1", {color: "#FFFFFF"}, 9.8);
+  tl.set("#cap2w2", {color: "#F5C518"}, 9.8333);
+  tl.set("#cap2w2", {color: "#FFFFFF"}, 9.9667);
+  tl.set("#cap2w3", {color: "#F5C518"}, 10.0333);
+  tl.set("#cap2w3", {color: "#FFFFFF"}, 10.2667);
+  tl.set("#cap2w4", {color: "#F5C518"}, 10.4);
+  tl.set("#cap2w4", {color: "#FFFFFF"}, 10.7333);
+  tl.set("#cap2w5", {color: "#F5C518"}, 10.8667);
+  tl.set("#cap2w5", {color: "#FFFFFF"}, 11.1333);
+  tl.set("#cap2w6", {color: "#F5C518"}, 11.2);
+  tl.set("#cap2w6", {color: "#FFFFFF"}, 11.3333);
+  tl.set("#cap2w7", {color: "#F5C518"}, 11.4333);
+  tl.set("#cap2w7", {color: "#FFFFFF"}, 11.7);
+  tl.set("#cap2w8", {color: "#F5C518"}, 11.8);
+  tl.set("#cap2w8", {color: "#FFFFFF"}, 12.0);
+  tl.set("#cap2w9", {color: "#F5C518"}, 12.0667);
+  tl.set("#cap2w9", {color: "#FFFFFF"}, 12.4);
+  tl.set("#cap2w10", {color: "#F5C518"}, 12.5);
+  tl.set("#cap2w10", {color: "#FFFFFF"}, 12.6667);
+  tl.set("[data-caption=\"cap3\"]", {autoAlpha: 1}, 12.7667);
+  tl.set("[data-caption=\"cap3\"]", {autoAlpha: 0}, 14.2);
+  tl.set("#cap3w0", {color: "#F5C518"}, 12.7667);
+  tl.set("#cap3w0", {color: "#FFFFFF"}, 12.8667);
+  tl.set("#cap3w1", {color: "#F5C518"}, 12.9333);
+  tl.set("#cap3w1", {color: "#FFFFFF"}, 13.1667);
+  tl.set("#cap3w2", {color: "#F5C518"}, 13.2);
+  tl.set("#cap3w2", {color: "#FFFFFF"}, 13.4333);
+  tl.set("#cap3w3", {color: "#F5C518"}, 13.5667);
+  tl.set("#cap3w3", {color: "#FFFFFF"}, 13.9333);
+  tl.set("[data-caption=\"cap4\"]", {autoAlpha: 1}, 14.2333);
+  tl.set("[data-caption=\"cap4\"]", {autoAlpha: 0}, 16.2667);
+  tl.set("#cap4w0", {color: "#F5C518"}, 14.2333);
+  tl.set("#cap4w0", {color: "#FFFFFF"}, 14.7);
+  tl.set("#cap4w1", {color: "#F5C518"}, 14.7667);
+  tl.set("#cap4w1", {color: "#FFFFFF"}, 15.1667);
+  tl.set("#cap4w2", {color: "#F5C518"}, 15.2667);
+  tl.set("#cap4w2", {color: "#FFFFFF"}, 15.4667);
+  tl.set("#cap4w3", {color: "#F5C518"}, 15.5);
+  tl.set("#cap4w3", {color: "#FFFFFF"}, 15.6667);
+  tl.set("#cap4w4", {color: "#F5C518"}, 15.7333);
+  tl.set("#cap4w4", {color: "#FFFFFF"}, 16.2667);
+  tl.set("[data-caption=\"cap5\"]", {autoAlpha: 1}, 16.3333);
+  tl.set("[data-caption=\"cap5\"]", {autoAlpha: 0}, 17.9667);
+  tl.set("#cap5w0", {color: "#F5C518"}, 16.3333);
+  tl.set("#cap5w0", {color: "#FFFFFF"}, 16.6667);
+  tl.set("#cap5w1", {color: "#F5C518"}, 16.7333);
+  tl.set("#cap5w1", {color: "#FFFFFF"}, 16.8667);
+  tl.set("#cap5w2", {color: "#F5C518"}, 16.9667);
+  tl.set("#cap5w2", {color: "#FFFFFF"}, 17.3333);
+  tl.set("[data-caption=\"cap6\"]", {autoAlpha: 1}, 18.0);
+  tl.set("[data-caption=\"cap6\"]", {autoAlpha: 0}, 20.5333);
+  tl.set("#cap6w0", {color: "#F5C518"}, 18.0);
+  tl.set("#cap6w0", {color: "#FFFFFF"}, 18.4333);
+  tl.set("#cap6w1", {color: "#F5C518"}, 18.5);
+  tl.set("#cap6w1", {color: "#FFFFFF"}, 18.6333);
+  tl.set("#cap6w2", {color: "#F5C518"}, 18.7);
+  tl.set("#cap6w2", {color: "#FFFFFF"}, 18.9333);
+  tl.set("#cap6w3", {color: "#F5C518"}, 19.0333);
+  tl.set("#cap6w3", {color: "#FFFFFF"}, 19.2333);
+  tl.set("#cap6w4", {color: "#F5C518"}, 19.2667);
+  tl.set("#cap6w4", {color: "#FFFFFF"}, 19.4);
+  tl.set("#cap6w5", {color: "#F5C518"}, 19.4667);
+  tl.set("#cap6w5", {color: "#FFFFFF"}, 19.7);
+  tl.set("#cap6w6", {color: "#F5C518"}, 19.7667);
+  tl.set("#cap6w6", {color: "#FFFFFF"}, 19.9);
+  tl.set("#cap6w7", {color: "#F5C518"}, 20.0333);
+  tl.set("#cap6w7", {color: "#FFFFFF"}, 20.3667);
+  tl.set("[data-caption=\"cap7\"]", {autoAlpha: 1}, 20.5667);
+  tl.set("[data-caption=\"cap7\"]", {autoAlpha: 0}, 22.8);
+  tl.set("#cap7w0", {color: "#F5C518"}, 20.5667);
+  tl.set("#cap7w0", {color: "#FFFFFF"}, 21.0333);
+  tl.set("#cap7w1", {color: "#F5C518"}, 21.1);
+  tl.set("#cap7w1", {color: "#FFFFFF"}, 21.4333);
+  tl.set("#cap7w2", {color: "#F5C518"}, 21.5);
+  tl.set("#cap7w2", {color: "#FFFFFF"}, 21.7333);
+  tl.set("#cap7w3", {color: "#F5C518"}, 21.8);
+  tl.set("#cap7w3", {color: "#FFFFFF"}, 21.9);
+  tl.set("#cap7w4", {color: "#F5C518"}, 21.9667);
+  tl.set("#cap7w4", {color: "#FFFFFF"}, 22.1);
+  tl.set("#cap7w5", {color: "#F5C518"}, 22.1667);
+  tl.set("#cap7w5", {color: "#FFFFFF"}, 22.4);
+  tl.set("#cap7w6", {color: "#F5C518"}, 22.4667);
+  tl.set("#cap7w6", {color: "#FFFFFF"}, 22.8);
+  tl.set("[data-caption=\"cap8\"]", {autoAlpha: 1}, 24.4);
+  tl.set("[data-caption=\"cap8\"]", {autoAlpha: 0}, 26.9667);
+  tl.set("#cap8w0", {color: "#F5C518"}, 24.4);
+  tl.set("#cap8w0", {color: "#FFFFFF"}, 24.6);
+  tl.set("#cap8w1", {color: "#F5C518"}, 24.7);
+  tl.set("#cap8w1", {color: "#FFFFFF"}, 25.0667);
+  tl.set("#cap8w2", {color: "#F5C518"}, 25.2);
+  tl.set("#cap8w2", {color: "#FFFFFF"}, 25.4667);
+  tl.set("#cap8w3", {color: "#F5C518"}, 25.5667);
+  tl.set("#cap8w3", {color: "#FFFFFF"}, 25.7333);
+  tl.set("#cap8w4", {color: "#F5C518"}, 25.8);
+  tl.set("#cap8w4", {color: "#FFFFFF"}, 26.0333);
+  tl.set("#cap8w5", {color: "#F5C518"}, 26.1667);
+  tl.set("#cap8w5", {color: "#FFFFFF"}, 26.6333);
+  tl.set("[data-caption=\"cap9\"]", {autoAlpha: 1}, 27.0);
+  tl.set("[data-caption=\"cap9\"]", {autoAlpha: 0}, 31.0333);
+  tl.set("#cap9w0", {color: "#F5C518"}, 27.0);
+  tl.set("#cap9w0", {color: "#FFFFFF"}, 27.5667);
+  tl.set("#cap9w1", {color: "#F5C518"}, 27.6667);
+  tl.set("#cap9w1", {color: "#FFFFFF"}, 28.0667);
+  tl.set("#cap9w2", {color: "#F5C518"}, 28.2);
+  tl.set("#cap9w2", {color: "#FFFFFF"}, 28.4333);
+  tl.set("#cap9w3", {color: "#F5C518"}, 28.5667);
+  tl.set("#cap9w3", {color: "#FFFFFF"}, 28.8333);
+  tl.set("#cap9w4", {color: "#F5C518"}, 28.9333);
+  tl.set("#cap9w4", {color: "#FFFFFF"}, 29.1333);
+  tl.set("#cap9w5", {color: "#F5C518"}, 29.1667);
+  tl.set("#cap9w5", {color: "#FFFFFF"}, 29.4);
+  tl.set("#cap9w6", {color: "#F5C518"}, 29.4667);
+  tl.set("#cap9w6", {color: "#FFFFFF"}, 29.6);
+  tl.set("#cap9w7", {color: "#F5C518"}, 29.6333);
+  tl.set("#cap9w7", {color: "#FFFFFF"}, 29.8);
+  tl.set("#cap9w8", {color: "#F5C518"}, 29.8667);
+  tl.set("#cap9w8", {color: "#FFFFFF"}, 30.1);
+  tl.set("#cap9w9", {color: "#F5C518"}, 30.1333);
+  tl.set("#cap9w9", {color: "#FFFFFF"}, 30.2667);
+  tl.set("#cap9w10", {color: "#F5C518"}, 30.3667);
+  tl.set("#cap9w10", {color: "#FFFFFF"}, 30.8667);
+  tl.set("[data-caption=\"cap10\"]", {autoAlpha: 1}, 31.0667);
+  tl.set("[data-caption=\"cap10\"]", {autoAlpha: 0}, 34.6333);
+  tl.set("#cap10w0", {color: "#F5C518"}, 31.0667);
+  tl.set("#cap10w0", {color: "#FFFFFF"}, 31.7333);
+  tl.set("#cap10w1", {color: "#F5C518"}, 31.8333);
+  tl.set("#cap10w1", {color: "#FFFFFF"}, 32.4333);
+  tl.set("#cap10w2", {color: "#F5C518"}, 32.5333);
+  tl.set("#cap10w2", {color: "#FFFFFF"}, 32.6667);
+  tl.set("#cap10w3", {color: "#F5C518"}, 32.8);
+  tl.set("#cap10w3", {color: "#FFFFFF"}, 33.0667);
+  tl.set("#cap10w4", {color: "#F5C518"}, 33.2);
+  tl.set("#cap10w4", {color: "#FFFFFF"}, 33.4667);
+  tl.set("#cap10w5", {color: "#F5C518"}, 33.5333);
+  tl.set("#cap10w5", {color: "#FFFFFF"}, 33.7333);
+  tl.set("#cap10w6", {color: "#F5C518"}, 33.8);
+  tl.set("#cap10w6", {color: "#FFFFFF"}, 34.0333);
+  tl.set("#cap10w7", {color: "#F5C518"}, 34.1333);
+  tl.set("#cap10w7", {color: "#FFFFFF"}, 34.3333);
+  tl.set("#cap10w8", {color: "#F5C518"}, 34.4);
+  tl.set("#cap10w8", {color: "#FFFFFF"}, 34.6333);
+  tl.set("[data-caption=\"cap11\"]", {autoAlpha: 1}, 35.1333);
+  tl.set("[data-caption=\"cap11\"]", {autoAlpha: 0}, 37.7);
+  tl.set("#cap11w0", {color: "#F5C518"}, 35.1333);
+  tl.set("#cap11w0", {color: "#FFFFFF"}, 35.7667);
+  tl.set("#cap11w1", {color: "#F5C518"}, 35.8);
+  tl.set("#cap11w1", {color: "#FFFFFF"}, 36.0333);
+  tl.set("#cap11w2", {color: "#F5C518"}, 36.1333);
+  tl.set("#cap11w2", {color: "#FFFFFF"}, 36.4333);
+  tl.set("#cap11w3", {color: "#F5C518"}, 36.4667);
+  tl.set("#cap11w3", {color: "#FFFFFF"}, 36.7333);
+  tl.set("#cap11w4", {color: "#F5C518"}, 36.8333);
+  tl.set("#cap11w4", {color: "#FFFFFF"}, 37.0);
+  tl.set("#cap11w5", {color: "#F5C518"}, 37.0667);
+  tl.set("#cap11w5", {color: "#FFFFFF"}, 37.2);
+  tl.set("#cap11w6", {color: "#F5C518"}, 37.3333);
+  tl.set("#cap11w6", {color: "#FFFFFF"}, 37.7);
+  tl.set("[data-caption=\"cap12\"]", {autoAlpha: 1}, 38.0667);
+  tl.set("[data-caption=\"cap12\"]", {autoAlpha: 0}, 41.6333);
+  tl.set("#cap12w0", {color: "#F5C518"}, 38.0667);
+  tl.set("#cap12w0", {color: "#FFFFFF"}, 39.1667);
+  tl.set("#cap12w1", {color: "#F5C518"}, 39.2);
+  tl.set("#cap12w1", {color: "#FFFFFF"}, 39.4333);
+  tl.set("#cap12w2", {color: "#F5C518"}, 39.5333);
+  tl.set("#cap12w2", {color: "#FFFFFF"}, 40.2);
+  tl.set("#cap12w3", {color: "#F5C518"}, 40.2667);
+  tl.set("#cap12w3", {color: "#FFFFFF"}, 40.4);
+  tl.set("#cap12w4", {color: "#F5C518"}, 40.4667);
+  tl.set("#cap12w4", {color: "#FFFFFF"}, 40.7);
+  tl.set("#cap12w5", {color: "#F5C518"}, 40.7333);
+  tl.set("#cap12w5", {color: "#FFFFFF"}, 40.9667);
+  tl.set("#cap12w6", {color: "#F5C518"}, 41.0667);
+  tl.set("#cap12w6", {color: "#FFFFFF"}, 41.4667);
+  tl.set("[data-caption=\"cap13\"]", {autoAlpha: 1}, 41.6667);
+  tl.set("[data-caption=\"cap13\"]", {autoAlpha: 0}, 44.4333);
+  tl.set("#cap13w0", {color: "#F5C518"}, 41.6667);
+  tl.set("#cap13w0", {color: "#FFFFFF"}, 41.9333);
+  tl.set("#cap13w1", {color: "#F5C518"}, 42.0);
+  tl.set("#cap13w1", {color: "#FFFFFF"}, 42.1);
+  tl.set("#cap13w2", {color: "#F5C518"}, 42.2);
+  tl.set("#cap13w2", {color: "#FFFFFF"}, 42.4);
+  tl.set("#cap13w3", {color: "#F5C518"}, 42.4667);
+  tl.set("#cap13w3", {color: "#FFFFFF"}, 42.9);
+  tl.set("#cap13w4", {color: "#F5C518"}, 43.0667);
+  tl.set("#cap13w4", {color: "#FFFFFF"}, 43.4667);
+  tl.set("#cap13w5", {color: "#F5C518"}, 43.5333);
+  tl.set("#cap13w5", {color: "#FFFFFF"}, 43.8667);
+  tl.set("#cap13w6", {color: "#F5C518"}, 43.9);
+  tl.set("#cap13w6", {color: "#FFFFFF"}, 44.0333);
+  tl.set("#cap13w7", {color: "#F5C518"}, 44.1333);
+  tl.set("#cap13w7", {color: "#FFFFFF"}, 44.4333);
+  tl.set("[data-caption=\"cap14\"]", {autoAlpha: 1}, 46.0333);
+  tl.set("[data-caption=\"cap14\"]", {autoAlpha: 0}, 48.7);
+  tl.set("#cap14w0", {color: "#F5C518"}, 46.0333);
+  tl.set("#cap14w0", {color: "#FFFFFF"}, 46.1333);
+  tl.set("#cap14w1", {color: "#F5C518"}, 46.2);
+  tl.set("#cap14w1", {color: "#FFFFFF"}, 46.4333);
+  tl.set("#cap14w2", {color: "#F5C518"}, 46.5);
+  tl.set("#cap14w2", {color: "#FFFFFF"}, 47.0);
+  tl.set("#cap14w3", {color: "#F5C518"}, 47.1);
+  tl.set("#cap14w3", {color: "#FFFFFF"}, 47.3);
+  tl.set("#cap14w4", {color: "#F5C518"}, 47.3333);
+  tl.set("#cap14w4", {color: "#FFFFFF"}, 47.6667);
+  tl.set("#cap14w5", {color: "#F5C518"}, 47.7333);
+  tl.set("#cap14w5", {color: "#FFFFFF"}, 47.9667);
+  tl.set("#cap14w6", {color: "#F5C518"}, 48.1);
+  tl.set("#cap14w6", {color: "#FFFFFF"}, 48.4333);
+  tl.set("[data-caption=\"cap15\"]", {autoAlpha: 1}, 48.7333);
+  tl.set("[data-caption=\"cap15\"]", {autoAlpha: 0}, 51.8);
+  tl.set("#cap15w0", {color: "#F5C518"}, 48.7333);
+  tl.set("#cap15w0", {color: "#FFFFFF"}, 49.0667);
+  tl.set("#cap15w1", {color: "#F5C518"}, 49.1333);
+  tl.set("#cap15w1", {color: "#FFFFFF"}, 49.3667);
+  tl.set("#cap15w2", {color: "#F5C518"}, 49.4333);
+  tl.set("#cap15w2", {color: "#FFFFFF"}, 49.8333);
+  tl.set("#cap15w3", {color: "#F5C518"}, 49.9333);
+  tl.set("#cap15w3", {color: "#FFFFFF"}, 50.2333);
+  tl.set("#cap15w4", {color: "#F5C518"}, 50.3);
+  tl.set("#cap15w4", {color: "#FFFFFF"}, 50.5);
+  tl.set("#cap15w5", {color: "#F5C518"}, 50.6333);
+  tl.set("#cap15w5", {color: "#FFFFFF"}, 51.1);
+  tl.set("#cap15w6", {color: "#F5C518"}, 51.2);
+  tl.set("#cap15w6", {color: "#FFFFFF"}, 51.6667);
+  tl.set("#cap15w7", {color: "#F5C518"}, 51.7333);
+  tl.set("#cap15w7", {color: "#FFFFFF"}, 51.8);
+  tl.set("[data-caption=\"cap16\"]", {autoAlpha: 1}, 51.9);
+  tl.set("[data-caption=\"cap16\"]", {autoAlpha: 0}, 54.7);
+  tl.set("#cap16w0", {color: "#F5C518"}, 51.9);
+  tl.set("#cap16w0", {color: "#FFFFFF"}, 52.3);
+  tl.set("#cap16w1", {color: "#F5C518"}, 52.3667);
+  tl.set("#cap16w1", {color: "#FFFFFF"}, 52.5667);
+  tl.set("#cap16w2", {color: "#F5C518"}, 52.6333);
+  tl.set("#cap16w2", {color: "#FFFFFF"}, 52.9667);
+  tl.set("#cap16w3", {color: "#F5C518"}, 53.0333);
+  tl.set("#cap16w3", {color: "#FFFFFF"}, 53.2333);
+  tl.set("#cap16w4", {color: "#F5C518"}, 53.3);
+  tl.set("#cap16w4", {color: "#FFFFFF"}, 53.5333);
+  tl.set("#cap16w5", {color: "#F5C518"}, 53.5667);
+  tl.set("#cap16w5", {color: "#FFFFFF"}, 53.7333);
+  tl.set("#cap16w6", {color: "#F5C518"}, 53.8);
+  tl.set("#cap16w6", {color: "#FFFFFF"}, 54.0333);
+  tl.set("#cap16w7", {color: "#F5C518"}, 54.1);
+  tl.set("#cap16w7", {color: "#FFFFFF"}, 54.2);
+  tl.set("#cap16w8", {color: "#F5C518"}, 54.3333);
+  tl.set("#cap16w8", {color: "#FFFFFF"}, 54.7);
+  tl.set("[data-caption=\"cap17\"]", {autoAlpha: 1}, 55.1333);
+  tl.set("[data-caption=\"cap17\"]", {autoAlpha: 0}, 57.2333);
+  tl.set("#cap17w0", {color: "#F5C518"}, 55.1333);
+  tl.set("#cap17w0", {color: "#FFFFFF"}, 55.6667);
+  tl.set("#cap17w1", {color: "#F5C518"}, 55.8);
+  tl.set("#cap17w1", {color: "#FFFFFF"}, 56.0333);
+  tl.set("#cap17w2", {color: "#F5C518"}, 56.1333);
+  tl.set("#cap17w2", {color: "#FFFFFF"}, 56.3333);
+  tl.set("#cap17w3", {color: "#F5C518"}, 56.4);
+  tl.set("#cap17w3", {color: "#FFFFFF"}, 56.4333);
+  tl.set("#cap17w4", {color: "#F5C518"}, 56.5667);
+  tl.set("#cap17w4", {color: "#FFFFFF"}, 56.9);
+  tl.set("[data-caption=\"cap18\"]", {autoAlpha: 1}, 57.2667);
+  tl.set("[data-caption=\"cap18\"]", {autoAlpha: 0}, 60.3);
+  tl.set("#cap18w0", {color: "#F5C518"}, 57.2667);
+  tl.set("#cap18w0", {color: "#FFFFFF"}, 57.7);
+  tl.set("#cap18w1", {color: "#F5C518"}, 57.7667);
+  tl.set("#cap18w1", {color: "#FFFFFF"}, 58.1);
+  tl.set("#cap18w2", {color: "#F5C518"}, 58.2);
+  tl.set("#cap18w2", {color: "#FFFFFF"}, 58.6667);
+  tl.set("#cap18w3", {color: "#F5C518"}, 58.8);
+  tl.set("#cap18w3", {color: "#FFFFFF"}, 59.0667);
+  tl.set("#cap18w4", {color: "#F5C518"}, 59.1);
+  tl.set("#cap18w4", {color: "#FFFFFF"}, 59.2667);
+  tl.set("#cap18w5", {color: "#F5C518"}, 59.3);
+  tl.set("#cap18w5", {color: "#FFFFFF"}, 59.5333);
+  tl.set("#cap18w6", {color: "#F5C518"}, 59.6);
+  tl.set("#cap18w6", {color: "#FFFFFF"}, 59.8333);
+  tl.set("#cap18w7", {color: "#F5C518"}, 59.9);
+  tl.set("#cap18w7", {color: "#FFFFFF"}, 60.3);
+  tl.set("[data-caption=\"cap19\"]", {autoAlpha: 1}, 60.3667);
+  tl.set("[data-caption=\"cap19\"]", {autoAlpha: 0}, 63.6667);
+  tl.set("#cap19w0", {color: "#F5C518"}, 60.3667);
+  tl.set("#cap19w0", {color: "#FFFFFF"}, 60.5333);
+  tl.set("#cap19w1", {color: "#F5C518"}, 60.6);
+  tl.set("#cap19w1", {color: "#FFFFFF"}, 60.8);
+  tl.set("#cap19w2", {color: "#F5C518"}, 60.9);
+  tl.set("#cap19w2", {color: "#FFFFFF"}, 61.1);
+  tl.set("#cap19w3", {color: "#F5C518"}, 61.1667);
+  tl.set("#cap19w3", {color: "#FFFFFF"}, 61.4);
+  tl.set("#cap19w4", {color: "#F5C518"}, 61.4667);
+  tl.set("#cap19w4", {color: "#FFFFFF"}, 61.8667);
+  tl.set("#cap19w5", {color: "#F5C518"}, 62.0);
+  tl.set("#cap19w5", {color: "#FFFFFF"}, 62.2667);
+  tl.set("#cap19w6", {color: "#F5C518"}, 62.3333);
+  tl.set("#cap19w6", {color: "#FFFFFF"}, 62.6333);
+  tl.set("#cap19w7", {color: "#F5C518"}, 62.7);
+  tl.set("#cap19w7", {color: "#FFFFFF"}, 62.8333);
+  tl.set("#cap19w8", {color: "#F5C518"}, 62.8667);
+  tl.set("#cap19w8", {color: "#FFFFFF"}, 63.1333);
+  tl.set("#cap19w9", {color: "#F5C518"}, 63.2333);
+  tl.set("#cap19w9", {color: "#FFFFFF"}, 63.6);
+  tl.set("[data-caption=\"cap20\"]", {autoAlpha: 1}, 65.2667);
+  tl.set("[data-caption=\"cap20\"]", {autoAlpha: 0}, 67.6);
+  tl.set("#cap20w0", {color: "#F5C518"}, 65.2667);
+  tl.set("#cap20w0", {color: "#FFFFFF"}, 65.5667);
+  tl.set("#cap20w1", {color: "#F5C518"}, 65.6);
+  tl.set("#cap20w1", {color: "#FFFFFF"}, 65.8333);
+  tl.set("#cap20w2", {color: "#F5C518"}, 65.9333);
+  tl.set("#cap20w2", {color: "#FFFFFF"}, 66.2333);
+  tl.set("#cap20w3", {color: "#F5C518"}, 66.2667);
+  tl.set("#cap20w3", {color: "#FFFFFF"}, 66.3333);
+  tl.set("#cap20w4", {color: "#F5C518"}, 66.4);
+  tl.set("#cap20w4", {color: "#FFFFFF"}, 66.6);
+  tl.set("#cap20w5", {color: "#F5C518"}, 66.6667);
+  tl.set("#cap20w5", {color: "#FFFFFF"}, 66.8);
+  tl.set("#cap20w6", {color: "#F5C518"}, 66.9667);
+  tl.set("#cap20w6", {color: "#FFFFFF"}, 67.5667);
+  tl.set("[data-caption=\"cap21\"]", {autoAlpha: 1}, 67.6333);
+  tl.set("[data-caption=\"cap21\"]", {autoAlpha: 0}, 69.7);
+  tl.set("#cap21w0", {color: "#F5C518"}, 67.6333);
+  tl.set("#cap21w0", {color: "#FFFFFF"}, 67.9667);
+  tl.set("#cap21w1", {color: "#F5C518"}, 68.1);
+  tl.set("#cap21w1", {color: "#FFFFFF"}, 68.3667);
+  tl.set("#cap21w2", {color: "#F5C518"}, 68.4);
+  tl.set("#cap21w2", {color: "#FFFFFF"}, 68.5333);
+  tl.set("#cap21w3", {color: "#F5C518"}, 68.6);
+  tl.set("#cap21w3", {color: "#FFFFFF"}, 68.8333);
+  tl.set("#cap21w4", {color: "#F5C518"}, 68.9);
+  tl.set("#cap21w4", {color: "#FFFFFF"}, 69.2333);
+  tl.set("[data-caption=\"cap22\"]", {autoAlpha: 1}, 69.7333);
+  tl.set("[data-caption=\"cap22\"]", {autoAlpha: 0}, 72.8667);
+  tl.set("#cap22w0", {color: "#F5C518"}, 69.7333);
+  tl.set("#cap22w0", {color: "#FFFFFF"}, 70.5667);
+  tl.set("#cap22w1", {color: "#F5C518"}, 70.6);
+  tl.set("#cap22w1", {color: "#FFFFFF"}, 70.7);
+  tl.set("#cap22w2", {color: "#F5C518"}, 70.7667);
+  tl.set("#cap22w2", {color: "#FFFFFF"}, 71.0);
+  tl.set("#cap22w3", {color: "#F5C518"}, 71.0667);
+  tl.set("#cap22w3", {color: "#FFFFFF"}, 71.2667);
+  tl.set("#cap22w4", {color: "#F5C518"}, 71.3);
+  tl.set("#cap22w4", {color: "#FFFFFF"}, 71.5667);
+  tl.set("#cap22w5", {color: "#F5C518"}, 71.6667);
+  tl.set("#cap22w5", {color: "#FFFFFF"}, 71.9667);
+  tl.set("#cap22w6", {color: "#F5C518"}, 72.0);
+  tl.set("#cap22w6", {color: "#FFFFFF"}, 72.3333);
+  tl.set("#cap22w7", {color: "#F5C518"}, 72.4);
+  tl.set("#cap22w7", {color: "#FFFFFF"}, 72.6333);
+  tl.set("#cap22w8", {color: "#F5C518"}, 72.7333);
+  tl.set("#cap22w8", {color: "#FFFFFF"}, 72.8667);
+  tl.set("[data-caption=\"cap23\"]", {autoAlpha: 1}, 72.9);
+  tl.set("[data-caption=\"cap23\"]", {autoAlpha: 0}, 76.1667);
+  tl.set("#cap23w0", {color: "#F5C518"}, 72.9);
+  tl.set("#cap23w0", {color: "#FFFFFF"}, 73.0667);
+  tl.set("#cap23w1", {color: "#F5C518"}, 73.1333);
+  tl.set("#cap23w1", {color: "#FFFFFF"}, 73.2667);
+  tl.set("#cap23w2", {color: "#F5C518"}, 73.3667);
+  tl.set("#cap23w2", {color: "#FFFFFF"}, 74.1333);
+  tl.set("#cap23w3", {color: "#F5C518"}, 74.2);
+  tl.set("#cap23w3", {color: "#FFFFFF"}, 74.3);
+  tl.set("#cap23w4", {color: "#F5C518"}, 74.4333);
+  tl.set("#cap23w4", {color: "#FFFFFF"}, 74.7);
+  tl.set("#cap23w5", {color: "#F5C518"}, 74.8);
+  tl.set("#cap23w5", {color: "#FFFFFF"}, 75.1);
+  tl.set("#cap23w6", {color: "#F5C518"}, 75.1333);
+  tl.set("#cap23w6", {color: "#FFFFFF"}, 75.2667);
+  tl.set("#cap23w7", {color: "#F5C518"}, 75.3333);
+  tl.set("#cap23w7", {color: "#FFFFFF"}, 75.5667);
+  tl.set("#cap23w8", {color: "#F5C518"}, 75.6);
+  tl.set("#cap23w8", {color: "#FFFFFF"}, 75.7667);
+  tl.set("#cap23w9", {color: "#F5C518"}, 75.8333);
+  tl.set("#cap23w9", {color: "#FFFFFF"}, 76.1333);
+  tl.set("[data-caption=\"cap24\"]", {autoAlpha: 1}, 77.7667);
+  tl.set("[data-caption=\"cap24\"]", {autoAlpha: 0}, 80.0);
+  tl.set("#cap24w0", {color: "#F5C518"}, 77.7667);
+  tl.set("#cap24w0", {color: "#FFFFFF"}, 78.0667);
+  tl.set("#cap24w1", {color: "#F5C518"}, 78.1);
+  tl.set("#cap24w1", {color: "#FFFFFF"}, 78.3333);
+  tl.set("#cap24w2", {color: "#F5C518"}, 78.4);
+  tl.set("#cap24w2", {color: "#FFFFFF"}, 78.5333);
+  tl.set("#cap24w3", {color: "#F5C518"}, 78.6333);
+  tl.set("#cap24w3", {color: "#FFFFFF"}, 78.9333);
+  tl.set("#cap24w4", {color: "#F5C518"}, 78.9667);
+  tl.set("#cap24w4", {color: "#FFFFFF"}, 79.1);
+  tl.set("#cap24w5", {color: "#F5C518"}, 79.1333);
+  tl.set("#cap24w5", {color: "#FFFFFF"}, 79.3);
+  tl.set("#cap24w6", {color: "#F5C518"}, 79.4);
+  tl.set("#cap24w6", {color: "#FFFFFF"}, 80.0);
+  tl.set("[data-caption=\"cap25\"]", {autoAlpha: 1}, 80.0333);
+  tl.set("[data-caption=\"cap25\"]", {autoAlpha: 0}, 83.4667);
+  tl.set("#cap25w0", {color: "#F5C518"}, 80.0333);
+  tl.set("#cap25w0", {color: "#FFFFFF"}, 80.2667);
+  tl.set("#cap25w1", {color: "#F5C518"}, 80.3333);
+  tl.set("#cap25w1", {color: "#FFFFFF"}, 80.5333);
+  tl.set("#cap25w2", {color: "#F5C518"}, 80.6333);
+  tl.set("#cap25w2", {color: "#FFFFFF"}, 81.1333);
+  tl.set("#cap25w3", {color: "#F5C518"}, 81.1333);
+  tl.set("#cap25w3", {color: "#FFFFFF"}, 81.2);
+  tl.set("#cap25w4", {color: "#F5C518"}, 81.3);
+  tl.set("#cap25w4", {color: "#FFFFFF"}, 81.5);
+  tl.set("#cap25w5", {color: "#F5C518"}, 81.5667);
+  tl.set("#cap25w5", {color: "#FFFFFF"}, 81.7);
+  tl.set("#cap25w6", {color: "#F5C518"}, 81.8);
+  tl.set("#cap25w6", {color: "#FFFFFF"}, 82.2667);
+  tl.set("#cap25w7", {color: "#F5C518"}, 82.3333);
+  tl.set("#cap25w7", {color: "#FFFFFF"}, 82.4667);
+  tl.set("#cap25w8", {color: "#F5C518"}, 82.5);
+  tl.set("#cap25w8", {color: "#FFFFFF"}, 82.7667);
+  tl.set("#cap25w9", {color: "#F5C518"}, 82.8667);
+  tl.set("#cap25w9", {color: "#FFFFFF"}, 83.2333);
+  tl.set("[data-caption=\"cap26\"]", {autoAlpha: 1}, 83.5333);
+  tl.set("[data-caption=\"cap26\"]", {autoAlpha: 0}, 86.1667);
+  tl.set("#cap26w0", {color: "#F5C518"}, 83.5333);
+  tl.set("#cap26w0", {color: "#FFFFFF"}, 84.0);
+  tl.set("#cap26w1", {color: "#F5C518"}, 84.1);
+  tl.set("#cap26w1", {color: "#FFFFFF"}, 84.3);
+  tl.set("#cap26w2", {color: "#F5C518"}, 84.3667);
+  tl.set("#cap26w2", {color: "#FFFFFF"}, 84.6);
+  tl.set("#cap26w3", {color: "#F5C518"}, 84.6333);
+  tl.set("#cap26w3", {color: "#FFFFFF"}, 84.8667);
+  tl.set("#cap26w4", {color: "#F5C518"}, 84.9333);
+  tl.set("#cap26w4", {color: "#FFFFFF"}, 85.0667);
+  tl.set("#cap26w5", {color: "#F5C518"}, 85.1333);
+  tl.set("#cap26w5", {color: "#FFFFFF"}, 85.2667);
+  tl.set("#cap26w6", {color: "#F5C518"}, 85.3);
+  tl.set("#cap26w6", {color: "#FFFFFF"}, 85.4667);
+  tl.set("#cap26w7", {color: "#F5C518"}, 85.5);
+  tl.set("#cap26w7", {color: "#FFFFFF"}, 85.6667);
+  tl.set("#cap26w8", {color: "#F5C518"}, 85.7667);
+  tl.set("#cap26w8", {color: "#FFFFFF"}, 86.1333);
+  tl.set("[data-caption=\"cap27\"]", {autoAlpha: 1}, 86.2);
+  tl.set("[data-caption=\"cap27\"]", {autoAlpha: 0}, 89.0333);
+  tl.set("#cap27w0", {color: "#F5C518"}, 86.2);
+  tl.set("#cap27w0", {color: "#FFFFFF"}, 86.5667);
+  tl.set("#cap27w1", {color: "#F5C518"}, 86.6667);
+  tl.set("#cap27w1", {color: "#FFFFFF"}, 86.8667);
+  tl.set("#cap27w2", {color: "#F5C518"}, 86.9);
+  tl.set("#cap27w2", {color: "#FFFFFF"}, 87.1333);
+  tl.set("#cap27w3", {color: "#F5C518"}, 87.2333);
+  tl.set("#cap27w3", {color: "#FFFFFF"}, 87.5333);
+  tl.set("#cap27w4", {color: "#F5C518"}, 87.6333);
+  tl.set("#cap27w4", {color: "#FFFFFF"}, 87.9);
+  tl.set("#cap27w5", {color: "#F5C518"}, 87.9667);
+  tl.set("#cap27w5", {color: "#FFFFFF"}, 88.1);
+  tl.set("#cap27w6", {color: "#F5C518"}, 88.1667);
+  tl.set("#cap27w6", {color: "#FFFFFF"}, 88.4);
+  tl.set("#cap27w7", {color: "#F5C518"}, 88.4333);
+  tl.set("#cap27w7", {color: "#FFFFFF"}, 88.6);
+  tl.set("#cap27w8", {color: "#F5C518"}, 88.7);
+  tl.set("#cap27w8", {color: "#FFFFFF"}, 89.0333);
+  tl.set("[data-caption=\"cap28\"]", {autoAlpha: 1}, 90.6333);
+  tl.set("[data-caption=\"cap28\"]", {autoAlpha: 0}, 92.5333);
+  tl.set("#cap28w0", {color: "#F5C518"}, 90.6333);
+  tl.set("#cap28w0", {color: "#FFFFFF"}, 91.0333);
+  tl.set("#cap28w1", {color: "#F5C518"}, 91.1);
+  tl.set("#cap28w1", {color: "#FFFFFF"}, 91.3);
+  tl.set("#cap28w2", {color: "#F5C518"}, 91.3667);
+  tl.set("#cap28w2", {color: "#FFFFFF"}, 91.5);
+  tl.set("#cap28w3", {color: "#F5C518"}, 91.5333);
+  tl.set("#cap28w3", {color: "#FFFFFF"}, 91.7);
+  tl.set("#cap28w4", {color: "#F5C518"}, 91.7667);
+  tl.set("#cap28w4", {color: "#FFFFFF"}, 91.9);
+  tl.set("#cap28w5", {color: "#F5C518"}, 91.9667);
+  tl.set("#cap28w5", {color: "#FFFFFF"}, 92.5);
+  tl.set("[data-caption=\"cap29\"]", {autoAlpha: 1}, 92.6);
+  tl.set("[data-caption=\"cap29\"]", {autoAlpha: 0}, 93.8);
+  tl.set("#cap29w0", {color: "#F5C518"}, 92.6);
+  tl.set("#cap29w0", {color: "#FFFFFF"}, 92.8333);
+  tl.set("#cap29w1", {color: "#F5C518"}, 92.9);
+  tl.set("#cap29w1", {color: "#FFFFFF"}, 93.1);
+  tl.set("#cap29w2", {color: "#F5C518"}, 93.2);
+  tl.set("#cap29w2", {color: "#FFFFFF"}, 93.6);
+  tl.set("[data-caption=\"cap30\"]", {autoAlpha: 1}, 93.8333);
+  tl.set("[data-caption=\"cap30\"]", {autoAlpha: 0}, 94.6);
+  tl.set("#cap30w0", {color: "#F5C518"}, 93.8333);
+  tl.set("#cap30w0", {color: "#FFFFFF"}, 94.0667);
+  tl.set("#cap30w1", {color: "#F5C518"}, 94.1667);
+  tl.set("#cap30w1", {color: "#FFFFFF"}, 94.6);
+  tl.fromTo("#narr-01_hook", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 0.5);
+  tl.to("#narr-01_hook", {volume: 0, duration: 0.25, ease: "none"}, 8.2333);
+  tl.fromTo("#narr-02_context", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 9.4);
+  tl.to("#narr-02_context", {volume: 0, duration: 0.25, ease: "none"}, 23.2);
+  tl.fromTo("#narr-03_development", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 24.4);
+  tl.to("#narr-03_development", {volume: 0, duration: 0.25, ease: "none"}, 44.8667);
+  tl.fromTo("#narr-04_twist", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 46.0333);
+  tl.to("#narr-04_twist", {volume: 0, duration: 0.25, ease: "none"}, 64.1);
+  tl.fromTo("#narr-05_lesson", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 65.2667);
+  tl.to("#narr-05_lesson", {volume: 0, duration: 0.25, ease: "none"}, 76.6);
+  tl.fromTo("#narr-06_reflection", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 77.7667);
+  tl.to("#narr-06_reflection", {volume: 0, duration: 0.25, ease: "none"}, 89.4667);
+  tl.fromTo("#narr-07_cta", {volume: 0}, {volume: 1, duration: 0.12, ease: "none"}, 90.6333);
+  tl.to("#narr-07_cta", {volume: 0, duration: 0.25, ease: "none"}, 95.0);
+  tl.set("#music", {volume: 0.1}, 0);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 0.5);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 8.4333);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 9.4);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 23.4);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 24.4);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 45.0667);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 46.0333);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 64.3);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 65.2667);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 76.8);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 77.7667);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 89.6667);
+  tl.to("#music", {volume: 0.05, duration: 0.3, ease: "none"}, 90.6333);
+  tl.to("#music", {volume: 0.1, duration: 0.6, ease: "none"}, 95.2);
+  tl.to("#music", {volume: 0, duration: 0.4, ease: "none"}, 78.4);
+  tl.to("#music", {volume: 0.1, duration: 1.0, ease: "none"}, 79.9);
+  tl.to("#music", {volume: 0, duration: 1.2, ease: "none"}, 94.6);
+  window.__timelines["main"] = tl;
+  tl.seek(0);
+  applyFrame(0);
+}
+    </script>
+  </body>
+</html>
